@@ -1,0 +1,127 @@
+#!/usr/bin/perl
+# whois.pl - Perl module for Eggdrop WHOIS lookups via RapidAPI
+# Place this file in your eggdrop/scripts/ directory
+
+use strict;
+use warnings;
+use LWP::UserAgent;
+use JSON;
+use URI::Escape;
+
+# Main query function called from TCL
+sub whois_query {
+    my ($domain, $api_key, $api_host, $api_endpoint) = @_;
+    
+    # Validate inputs
+    return "ERROR: Missing API key" unless $api_key && $api_key ne "YOUR_RAPIDAPI_KEY_HERE";
+    return "ERROR: Invalid domain" unless $domain;
+    
+    # Clean domain
+    $domain =~ s/^\s+|\s+$//g;
+    
+    # Create HTTP client
+    my $ua = LWP::UserAgent->new(
+        timeout => 10,
+        agent => 'EggdropBot/1.0'
+    );
+    
+    # Prepare API request
+    my $url = "https://$api_host$api_endpoint";
+    my $encoded_domain = uri_escape($domain);
+    
+    my $request = HTTP::Request->new('GET', "$url?domain=$encoded_domain");
+    $request->header('X-RapidAPI-Key' => $api_key);
+    $request->header('X-RapidAPI-Host' => $api_host);
+    
+    # Execute request
+    my $response = $ua->request($request);
+    
+    # Handle HTTP errors
+    unless ($response->is_success) {
+        return "ERROR: API request failed - " . $response->status_line;
+    }
+    
+    # Parse JSON response
+    my $data;
+    eval {
+        $data = decode_json($response->decoded_content);
+    };
+    if ($@) {
+        return "ERROR: Invalid JSON response - $@";
+    }
+    
+    # Format output as single line
+    return format_whois_line($domain, $data);
+}
+
+# Format WHOIS data into a concise single line
+sub format_whois_line {
+    my ($domain, $data) = @_;
+    
+    my @parts;
+    
+    # Domain name
+    push @parts, "\002$domain\002";
+    
+    # Registrar
+    if ($data->{registrar} && $data->{registrar}->{name}) {
+        push @parts, "Registrar: $data->{registrar}->{name}";
+    }
+    
+    # Registration date
+    if ($data->{created_date}) {
+        my $date = format_date($data->{created_date});
+        push @parts, "Created: $date";
+    }
+    
+    # Expiration date
+    if ($data->{expiry_date}) {
+        my $date = format_date($data->{expiry_date});
+        push @parts, "Expires: $date";
+    }
+    
+    # Status
+    if ($data->{domain_status}) {
+        my $status = ref($data->{domain_status}) eq 'ARRAY' 
+            ? $data->{domain_status}->[0] 
+            : $data->{domain_status};
+        $status =~ s/\s*https?:.*$//;  # Remove URL suffixes
+        push @parts, "Status: $status";
+    }
+    
+    # Name servers
+    if ($data->{name_servers} && ref($data->{name_servers}) eq 'ARRAY') {
+        my $ns_count = scalar @{$data->{name_servers}};
+        my $ns_list = join(', ', map { lc($_) } @{$data->{name_servers}}[0..($ns_count > 2 ? 1 : $ns_count-1)]);
+        if ($ns_count > 2) {
+            $ns_list .= " (+". ($ns_count - 2) . " more)";
+        }
+        push @parts, "NS: $ns_list";
+    }
+    
+    # Registrant country (if available)
+    if ($data->{registrant} && $data->{registrant}->{country}) {
+        push @parts, "Country: $data->{registrant}->{country}";
+    }
+    
+    # If no data found
+    return "ERROR: No WHOIS data found for $domain" unless @parts > 1;
+    
+    return join(' | ', @parts);
+}
+
+# Format date to YYYY-MM-DD
+sub format_date {
+    my ($date) = @_;
+    return $date unless $date;
+    
+    # Extract YYYY-MM-DD from various formats
+    if ($date =~ /(\d{4})-(\d{2})-(\d{2})/) {
+        return "$1-$2-$3";
+    }
+    
+    return $date;
+}
+
+# Return 1 to indicate successful module load
+1;

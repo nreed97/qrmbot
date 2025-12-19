@@ -1457,4 +1457,45 @@ bind pub - !shart shart
 bind pub - !shartstatus shartstatus
 
 
+#This is probably stupid - WHOIS ME, WHOAM I
+
+## Configuration - Set your RapidAPI key here
+set whois_api_key "YOUR_RAPIDAPI_KEY_HERE" #IDK how you want the API key, but I have one for you bb
+set whois_api_host "whois-api6.p.rapidapi.com"
+set whois_api_endpoint "/dns/api/v1/getRecords"
+
+## Bind the !whois command
+bind pub - !whois pub_whois
+
+proc pub_whois {nick uhost hand chan text} {
+    global whois_api_key whois_api_host
+    
+    set domain [lindex [split $text] 0]
+    
+    if {$domain == ""} {
+        putserv "PRIVMSG $chan :Usage: !whois <domain>"
+        return 0
+    }
+    
+    # Remove protocol if present
+    regsub -all {^https?://} $domain "" domain
+    # Remove www. if present
+    regsub -all {^www\.} $domain "" domain
+    # Remove path if present
+    regsub {/.*$} $domain "" domain
+    
+    putserv "PRIVMSG $chan :Looking up WHOIS for $domain..."
+    
+    # Call Perl subroutine to fetch WHOIS data
+    set result [whois_query $domain $whois_api_key $whois_api_host $whois_api_endpoint]
+    
+    if {[string match "ERROR:*" $result]} {
+        putserv "PRIVMSG $chan :\002WHOIS Error:\002 $result"
+    } else {
+        putserv "PRIVMSG $chan :$result"
+    }
+    
+    return 0
+}
+
 putlog "fun.tcl loaded."
