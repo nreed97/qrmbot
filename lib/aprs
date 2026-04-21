@@ -38,11 +38,15 @@ if ($#ARGV < 0 || length($ARGV[0]) == 0) {
 }
 
 our $apikey = undef;
-my $apikeyfile = $ENV{'HOME'} . "/.aprs.fi";
-if (-e ($apikeyfile)) {
-  require($apikeyfile);
+my $newApikeyfile = $ENV{'HOME'} . "/.qrmbot/keys/aprs.fi";
+my $oldApikeyfile = $ENV{'HOME'} . "/.aprs.fi";
+moveFile($oldApikeyfile, $newApikeyfile);
+if (-e ($newApikeyfile)) {
+  require($newApikeyfile);
+} elsif (-e $oldApikeyfile) { # fallback
+  require($oldApikeyfile);
 } else {
-  die "error: unable to read file $apikeyfile"
+  die "error: unable to read file $newApikeyfile"
 }
 die "error: no API key set" unless defined($apikey);
 
@@ -202,6 +206,8 @@ sub getvals {
 	my $key = $1;
 	my $val = $2;
 	$val =~ s/,$//;
+	$val =~ s/\\u([0-9a-f]{4})/chr(hex($1))/eg;
+	$val =~ s|\\/|/|g;
 	$$valref{$key} = $val;
 	#print "$key = $val\n";
       }

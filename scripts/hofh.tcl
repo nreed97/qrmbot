@@ -43,7 +43,6 @@ proc h_pubquote { nick uhost hand chan arg } {
   if { [file exists $hofhfile] } {
 
     set qf [open $hofhfile r]
-    set done 0
 
     set fd [open "|wc -l $hofhfile" r]
     while {![eof $fd]} {
@@ -52,7 +51,10 @@ proc h_pubquote { nick uhost hand chan arg } {
     }
     close $fd
 
-    set i 0
+    if { $tmp == 0 } {
+      putchan $chan "no hofh recorded"
+      return
+    }
 
     if { [string trim "$arg"] == "" } {
       set j [rand $tmp]
@@ -69,11 +71,10 @@ proc h_pubquote { nick uhost hand chan arg } {
       }
     }
 
+    set i 0
     while { $j >= $i } {
-
       set line [gets $qf]
       incr i
-
     }
 
     close $qf

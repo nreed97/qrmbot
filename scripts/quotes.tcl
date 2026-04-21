@@ -47,7 +47,6 @@ proc q_pubquote { nick uhost hand chan arg } {
 
     set qf [open $quotefile r]
     fconfigure $qf -encoding utf-8
-    set done 0
 
     set fd [open "|wc -l $quotefile" r]
     while {![eof $fd]} {
@@ -55,6 +54,11 @@ proc q_pubquote { nick uhost hand chan arg } {
       if {[eof $fd]} {break}
     }
     close $fd
+
+    if { $tmp == 0 } {
+      putchan $chan "no quotes recorded for $chan"
+      return
+    }
 
     set i 0
 
@@ -105,6 +109,7 @@ proc q_pebus { nick uhost hand chan arg } {
 
         set i 0
 
+        set found [list]
         while {$i < $tmp} {
             set line [gets $qf]
 	    if { [regexp -nocase {n0rua|ae0kw|tonyc} [lindex $line 0]] } then {
@@ -113,6 +118,11 @@ proc q_pebus { nick uhost hand chan arg } {
             incr i
         }
 	close $qf
+
+	if { [llength $found] == 0 } {
+	    putchan $chan "no relevant quotes found for $chan"
+	    return
+	}
 
 	set quotenum [lindex $found [expr int(rand() * [llength $found])]]
 

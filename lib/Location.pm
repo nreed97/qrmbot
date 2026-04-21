@@ -18,11 +18,16 @@ use Math::Trig 'great_circle_destination';
 use URI::Escape;
 use JSON qw( decode_json );
 use Time::HiRes qw(usleep);
+use Util;
 
 sub getGeocodingAPIKey {
-  my $apikeyfile = $ENV{'HOME'} . "/.googleapikeys";
+  my $old_apikeyfile = $ENV{'HOME'} . "/.googleapikeys";
+  my $apikeyfile     = $ENV{'HOME'} . "/.qrmbot/keys/google";
+  moveFile($old_apikeyfile, $apikeyfile);
   if (-e ($apikeyfile)) {
     do $apikeyfile;
+  } elsif (-e ($old_apikeyfile)) {
+    do $old_apikeyfile;
   } else {
     print "error: unable to read file $apikeyfile\n";
   }
@@ -118,10 +123,10 @@ sub qthToCoords {
 	usleep 1000 if $tries + 1 < $maxtries;
 	last GET;
       }
-      if (/<lat>([+-]?\d+.\d+)<\/lat>/) {
+      if (/<lat>([+-]?\d+\.\d+)<\/lat>/) {
 	$lat = $1;
       }
-      if (/<lng>([+-]?\d+.\d+)<\/lng>/) {
+      if (/<lng>([+-]?\d+\.\d+)<\/lng>/) {
 	$lon = $1;
       }
       if (defined($lat) and defined($lon)) {
@@ -240,7 +245,7 @@ sub argToCoords {
   if ($arg =~ /^(grid:)? ?([A-R]{2}[0-9]{2}([a-x]{2})?)/i) {
     $arg = $2;
     $type = "grid";
-  } elsif ($arg =~ /^(geo:)? ?([-+]?\d+(.\d+)?,\s?[-+]?\d+(.\d+)?)/i) {
+  } elsif ($arg =~ /^(geo:)? ?([-+]?\d+(\.\d+)?,\s?[-+]?\d+(\.\d+)?)/i) {
     $arg = $2;
     $type = "geo";
   } else {
@@ -310,7 +315,7 @@ sub rangeAndBearing {
   my $diro = deg2rad($bearing);
   my $distance = $range / 6378.1; # in radians
 
-  ($thetad, $phid, $dird) = great_circle_destination(@origin, $diro, $distance);
+  my ($thetad, $phid, $dird) = great_circle_destination(@origin, $diro, $distance);
   my ($lon2, $lat2) = (rad2deg($thetad), rad2deg($phid)); # note order
 
   return ($lat2, $lon2);
@@ -345,7 +350,7 @@ sub coordToTZ {
   open (HTTP, '-|', "curl --stderr - -N -k -s -L --max-time 5 '$url'");
   binmode(HTTP, ":utf8");
   local $/; # read entire output -- potentially memory hungry
-  $json = <HTTP>;
+  my $json = <HTTP>;
   close(HTTP);
   my $j = decode_json($json);
 

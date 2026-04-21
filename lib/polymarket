@@ -1,0 +1,354 @@
+#!/usr/bin/perl -w
+#
+# Look up prediction markets on Polymarket.
+#
+# 2-clause BSD license.
+# Copyright (c) 2025 cjh@github. All rights reserved.
+#
+# Uses the Polymarket Gamma API -- no API key required.
+
+use strict;
+use utf8;
+use feature 'unicode_strings';
+binmode(STDOUT, ":utf8");
+
+use JSON::PP qw( decode_json );
+use URI::Escape;
+
+use File::Basename;
+use Cwd 'realpath';
+use lib dirname(realpath(__FILE__));
+use Colors;
+use Util;
+
+my $username = $ENV{'USER'} || $ENV{'USERNAME'} || getpwuid($<);
+
+our $exitnonzeroonerror = 1;
+$exitnonzeroonerror = 0 if $username eq getEggdropUID();
+
+# eggdrop passes all args as one string
+@ARGV = split(' ', join(' ', @ARGV));
+
+my $useragent = "Mozilla/5.0 (compatible; qrmbot)";
+
+sub fetchJSON {
+  my $url = shift;
+  open(my $fh, '-|', "curl --max-time 10 -s -k -L -A \"$useragent\" '$url'");
+  local $/;
+  my $res = <$fh>;
+  close($fh);
+  return undef unless defined $res && length($res) > 0;
+  return decode_json($res);
+}
+
+# Parse flags
+my ($slug, $event_slug);
+my @search_args;
+my $i = 0;
+while ($i <= $#ARGV) {
+  if ($ARGV[$i] eq "--slug" && $i + 1 <= $#ARGV) {
+    $slug = $ARGV[$i + 1];
+    $i += 2;
+  } elsif ($ARGV[$i] eq "--event" && $i + 1 <= $#ARGV) {
+    $event_slug = $ARGV[$i + 1];
+    $i += 2;
+  } else {
+    push @search_args, $ARGV[$i];
+    $i++;
+  }
+}
+
+sub fmt_vol {
+  my $v = shift // 0;
+  return sprintf('$%.1fM', $v / 1_000_000) if $v >= 1_000_000;
+  return sprintf('$%.0fK', $v / 1_000)     if $v >= 1_000;
+  return sprintf('$%.0f', $v);
+}
+
+sub fmt_pct {
+  my $p = shift // 0;
+  return sprintf('%.0f%%', $p * 100);
+}
+
+sub visible_len {
+  my $s = shift // '';
+  $s =~ s/\x03\d{1,2}(,\d{1,2})?//g;  # IRC color codes
+  $s =~ s/[\x02\x0F\x16\x1F]//g;       # bold, reset, reverse, underline
+  return length($s);
+}
+
+sub color_pct {
+  my $p = shift // 0;
+  my $str = fmt_pct($p);
+  return green($str)  if $p >= 0.6;
+  return yellow($str) if $p >= 0.35;
+  return red($str);
+}
+
+# Build a short "outcome: pct | outcome: pct" string from a market hash.
+# For binary Yes/No markets, shows YES: 96% | NO: 4%
+# For multi-outcome markets, shows top 3 by probability.
+sub outcome_str {
+  my $market = shift;
+  my $outcomes = decode_json($market->{outcomes} // '["Yes","No"]');
+  my $prices   = decode_json($market->{outcomePrices} // '[0,0]');
+
+  # pair outcomes with prices, sort descending by price
+  my @pairs = map { { name => $outcomes->[$_], p => $prices->[$_] + 0 } } 0..$#$outcomes;
+  @pairs = sort { $b->{p} <=> $a->{p} } @pairs if @pairs > 2;
+
+  my $limit = (@pairs > 2) ? 3 : scalar @pairs;
+  my @parts;
+  for my $j (0..$limit-1) {
+    push @parts, bold($pairs[$j]{name}) . ": " . color_pct($pairs[$j]{p});
+  }
+  return join(" | ", @parts);
+}
+
+sub print_market {
+  my ($market, $url) = @_;
+
+  my $question = $market->{question} // "Unknown";
+  my $volume   = $market->{volumeNum} // ($market->{volume} // 0) + 0;
+
+  unless (defined $url) {
+    my @eslugs = map { $_->{slug} } @{$market->{events} // []};
+    $url = @eslugs
+      ? "https://polymarket.com/event/$eslugs[0]"
+      : "https://polymarket.com/" . ($market->{slug} // "");
+  }
+  { my $s = shortenUrl($url); $url = $s if defined $s; }
+
+  my $sep = " \x{00B7} ";
+  print bold($question);
+  print $sep . outcome_str($market);
+  print $sep . "Vol: " . fmt_vol($volume);
+  print $sep . $url;
+  print "\n";
+}
+
+sub longest_common_prefix {
+  my @strs = @_;
+  return "" unless @strs >= 2;
+  my $prefix = $strs[0];
+  for my $s (@strs[1..$#strs]) {
+    while (length($prefix) && index($s, $prefix) != 0) {
+      chop $prefix;
+    }
+    last unless length($prefix);
+  }
+  # trim back to a word boundary: only strip a partial trailing word
+  if ($prefix =~ /\S$/) {
+    $prefix =~ s/\s*\S+$//;
+  }
+  $prefix =~ s/\s+$//;
+  return $prefix;
+}
+
+sub longest_common_suffix {
+  my @strs = @_;
+  return "" unless @strs >= 2;
+  my $suffix = $strs[0];
+  for my $s (@strs[1..$#strs]) {
+    while (length($suffix) && substr($s, -length($suffix)) ne $suffix) {
+      $suffix = substr($suffix, 1);
+    }
+    last unless length($suffix);
+  }
+  # trim partial leading word (but keep leading space so it peels off cleanly)
+  if ($suffix =~ /^\S/) {
+    $suffix =~ s/^\S+//;
+  }
+  return $suffix;
+}
+
+# Print a multi-market event intelligently:
+#   - Sports moneyline (non-Yes/No) + O/U/Spread props → show moneyline only
+#   - Soccer 1X2 (all Yes/No, has a draw market) → compact "Team: pct | Draw: pct | Team: pct"
+#   - Anything else → top 5 by yes-probability
+sub print_event {
+  my ($event, $event_url) = @_;
+  my $title   = $event->{title} // "Unknown";
+  my @markets = grep { !$_->{archived} } @{$event->{markets} // []};
+  my $sep     = " \x{00B7} ";
+
+  if (@markets == 0) {
+    print "polymarket: no markets in event: $title\n";
+    return;
+  }
+
+  if (@markets == 1) {
+    print_market($markets[0], $event_url);
+    return;
+  }
+
+  # Sports moneyline: non-Yes/No 2-outcome market alongside O/U or Spread markets
+  my @moneyline = grep {
+    my $outcomes = decode_json($_->{outcomes} // '["Yes","No"]');
+    my $q = $_->{question} // "";
+    @$outcomes == 2 && lc($outcomes->[0]) ne 'yes' && $q !~ /\bO\/U\b|\bSpread\b|\bTotal\b/i
+  } @markets;
+  my @prop_markets = grep {
+    ($_->{question} // "") =~ /\bO\/U\b|\bSpread\b|\bTotal\b/i
+  } @markets;
+
+  { my $s = shortenUrl($event_url); $event_url = $s if defined $s; }
+  if (@moneyline && @prop_markets) {
+    my $ml  = $moneyline[0];
+    my $vol = ($ml->{volumeNum} // ($ml->{volume} // 0)) + 0;
+    print bold($title);
+    print $sep . outcome_str($ml);
+    print $sep . "Vol: " . fmt_vol($vol);
+    print $sep . $event_url;
+    print "\n";
+    return;
+  }
+
+  # Soccer/football 1X2: all Yes/No binary markets, one asking about a draw
+  my $all_binary = !grep {
+    my $o = decode_json($_->{outcomes} // '["Yes","No"]');
+    !(@$o == 2 && lc($o->[0]) eq 'yes')
+  } @markets;
+  my $has_draw = grep { ($_->{question} // "") =~ /\bdraw\b/i } @markets;
+
+  if ($all_binary && $has_draw) {
+    my @parts;
+    for my $m (@markets) {
+      my $q      = $m->{question} // "";
+      my $prices = decode_json($m->{outcomePrices} // '[0,0]');
+      my $label;
+      if    ($q =~ /\bdraw\b/i)          { $label = "Draw" }
+      elsif ($q =~ /^Will (.+?) win\b/i) { $label = $1 }
+      else                               { $label = $q }
+      push @parts, { label => $label, p => $prices->[0] + 0 };
+    }
+    @parts = sort { $b->{p} <=> $a->{p} } @parts;
+    my $vol = ($event->{volume} // 0) + 0;
+    print bold($title);
+    print $sep . join(" | ", map { bold($_->{label}) . ": " . color_pct($_->{p}) } @parts);
+    print $sep . "Vol: " . fmt_vol($vol);
+    print $sep . $event_url;
+    print "\n";
+    return;
+  }
+
+  # Default: show as many markets as fit within the visible character budget
+  my $CHAR_BUDGET = 300;  # max visible characters for message content
+  my $MIN_ENTRIES = 3;    # always show at least this many
+  my $MAX_ENTRIES = 10;   # never show more than this many
+
+  my @sorted = sort { ($b->{outcomePrices} ? (decode_json($b->{outcomePrices}))->[0] + 0 : 0)
+                  <=> ($a->{outcomePrices} ? (decode_json($a->{outcomePrices}))->[0] + 0 : 0) } @markets;
+
+  # Compute prefix/suffix from the top candidates (capped at MAX_ENTRIES)
+  # so outlier low-probability markets don't corrupt the common prefix
+  # Note: avoid slice beyond $#sorted — Perl extends arrays with undef when over-sliced
+  my @top_candidates = @sorted > $MAX_ENTRIES ? @sorted[0..$MAX_ENTRIES-1] : @sorted;
+  my @questions = map { $_->{question} // "" } @top_candidates;
+  my $prefix    = longest_common_prefix(@questions);
+  my $suffix    = longest_common_suffix(@questions);
+  my $pfxlen    = length($prefix);
+  my $sfxlen    = length($suffix);
+  my $strip_pfx = $pfxlen > 10 || ($pfxlen > 2 && $sfxlen > 15);
+  my $strip_sfx = $sfxlen > 15;
+
+  # Shorten URL now so we can account for its length in the budget
+  { my $s = shortenUrl($event_url); $event_url = $s if defined $s; }
+
+  # Fixed overhead: title + trailing sep + URL
+  my $used = visible_len(bold($title)) + visible_len($sep . $event_url);
+
+  # Greedily add entries until budget is exhausted or limits are hit
+  my @entries;
+  for my $m (@sorted) {
+    last if @entries >= $MAX_ENTRIES;
+    next unless defined $m;
+    my $q        = $m->{question} // "";
+    my $outcomes = decode_json($m->{outcomes} // '["Yes","No"]');
+    my $prices   = decode_json($m->{outcomePrices} // '[0,0]');
+    my $entry;
+    if (@$outcomes == 2 && lc($outcomes->[0]) eq 'yes') {
+      my $label = $q;
+      if ($strip_pfx && index($q, $prefix) == 0) {
+        $label = substr($label, $pfxlen);
+        $label =~ s/^\s+//;
+      }
+      if ($strip_sfx && length($label) > $sfxlen && substr($label, -$sfxlen) eq $suffix) {
+        $label = substr($label, 0, length($label) - $sfxlen);
+        $label =~ s/\s+$//;
+      }
+      $label = "\x{2026}$label" if $strip_pfx;
+      $entry = $sep . $label . " " . color_pct($prices->[0] + 0);
+    } else {
+      $entry = $sep . outcome_str($m);
+    }
+    if (@entries >= $MIN_ENTRIES && $used + visible_len($entry) > $CHAR_BUDGET) {
+      last;
+    }
+    $used += visible_len($entry);
+    push @entries, $entry;
+  }
+
+  print bold($title);
+  print $_ for @entries;
+  print $sep . $event_url;
+  print "\n";
+}
+
+# --- Event lookup ---
+if (defined $event_slug) {
+  my $url = "https://gamma-api.polymarket.com/events?slug=" . uri_escape($event_slug);
+  my $data = fetchJSON($url);
+
+  if (!defined $data || ref($data) ne 'ARRAY' || scalar(@$data) == 0) {
+    print "polymarket: event not found: $event_slug\n";
+    exit $exitnonzeroonerror;
+  }
+
+  my $event_url = "https://polymarket.com/event/$event_slug";
+  print_event($data->[0], $event_url);
+  exit 0;
+}
+
+# --- Market slug lookup ---
+if (defined $slug) {
+  my $url = "https://gamma-api.polymarket.com/markets?slug=" . uri_escape($slug);
+  my $data = fetchJSON($url);
+
+  if (!defined $data || ref($data) ne 'ARRAY' || scalar(@$data) == 0) {
+    print "polymarket: market not found: $slug\n";
+    exit $exitnonzeroonerror;
+  }
+
+  print_market($data->[0], undef);
+  exit 0;
+}
+
+# --- Text search ---
+my $query = join(" ", @search_args);
+if (!$query || length($query) == 0) {
+  print "usage: !polymarket <search term>\n";
+  exit $exitnonzeroonerror;
+}
+
+# Use the public-search endpoint for real text search.
+my $enc_q = uri_escape_utf8($query);
+my $search_url = "https://gamma-api.polymarket.com/public-search?q=$enc_q&limit_per_type=5&events_status=active";
+my $search_data = fetchJSON($search_url);
+
+if (defined $search_data && ref($search_data) eq 'HASH') {
+  my @events = @{$search_data->{events} // []};
+
+  if (@events) {
+    my $event     = $events[0];
+    my $eslug     = $event->{slug} // "";
+    my @markets   = @{$event->{markets} // []};
+    my $event_url = "https://polymarket.com/event/$eslug";
+
+    print_event($event, $event_url);
+    exit 0;
+  }
+}
+
+print "polymarket: no markets found for: $query\n";
+exit 0;

@@ -3,7 +3,7 @@
 # 2-clause BSD license.
 # Copyright (c) 2018, 2019, 2020, 2021 molo1134@github. All rights reserved.
 
-# put the following in $HOME/.clublogapikey to use the log search:
+# put the following in $HOME/.qrmbot/keys/clublog to use the log search:
 #
 #our $apikey="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
@@ -18,13 +18,16 @@ use File::Temp qw(tempfile);
 use strict;
 
 my $url = 'https://clublog.org/clublog-users.json.zip';
-my $userfile=$ENV{'HOME'} . "/.clublogusers.gz";
+my $old_userfile=$ENV{'HOME'} . "/.clublogusers.gz";
+my $userfile    =$ENV{'HOME'} . "/.qrmbot/cache/clublogusers.gz";
 my $maxage=604800; # 1 week
 my $username = $ENV{'USER'} || $ENV{'USERNAME'} || getpwuid($<);
 
 # change this to 0 to always exit with success
 my $exitnonzeroonerror = 1;
 $exitnonzeroonerror = 0 if $username eq getEggdropUID();
+
+moveFile($old_userfile, $userfile);
 
 sub updatezip {
   my (undef, $tmpfile) = tempfile();
@@ -33,7 +36,17 @@ sub updatezip {
   unlink $tmpfile;
 }
 
-
+our $apikey = undef;
+my $newApikeyfile = $ENV{'HOME'} . "/.qrmbot/keys/clublog";
+my $oldApikeyfile = $ENV{'HOME'} . "/.clublogapikey";
+moveFile($oldApikeyfile, $newApikeyfile);
+if (-e ($newApikeyfile)) {
+  require($newApikeyfile);
+} elsif (-e $oldApikeyfile) { # fallback
+  require($oldApikeyfile);
+} else {
+  die "error: unable to read file $newApikeyfile"
+}
 
 if ($#ARGV < 0 || length($ARGV[0]) == 0) {
   if ($username eq getEggdropUID()) {
@@ -57,7 +70,6 @@ if ($#ARGV >= 1) {
 
 if (defined $call2) {
   our $apikey;
-  require ($ENV{HOME} . "/.clublogapikey");
   my $url = "https://clublog.org/logsearchjson.php?log=${call}&call=${call2}&api=$apikey";
   local $/;   # read entire file -- FIXME: potentially memory hungry
   open(JSON, '-|', "curl -k -L --max-time 10 --retry 1 -s '$url'");
@@ -158,7 +170,6 @@ if (defined ($j->{$call})) {
 
 # get latest qso start and end dates from the API, because zip file is old
 our $apikey;
-require ($ENV{HOME} . "/.clublogapikey");
 my $url = "https://clublog.org/logcheck.php?call=${call}&api=${apikey}";
 
 local $/;   # read entire file -- FIXME: potentially memory hungry

@@ -66,33 +66,34 @@ $ sudo dpkg -i ../libastro-satpass-perl_0.077-1_all.deb
 
 ## Configuration files
 
-* `$HOME/.aerisweather` -- API key for aerisweather.com
-* `$HOME/.aprs.fi` -- required [aprs.fi](http://aprs.fi/) API key for `aprs` tool
-* `$HOME/.bitlyapikey` -- key for bit.ly API
-* `$HOME/.clublogapikey` -- API key for clublog.org
-* `$HOME/.coinmarketcapkey` -- API key for coinmarketcap.com
-* `$HOME/.darksky` -- API key for darksky.com
-* `$HOME/.deeplapikey` -- API key for deepl.com translation
-* `$HOME/.googleapikeys` -- key for Google APIs
-* `$HOME/.hamspotlogin` -- required login credentials for [hamspots.net](http://hamspots.net) use
-* `$HOME/.imgurkey` -- API key for imgur.com
-* `$HOME/.nicks.csv` -- irc and reddit nicknames -- optional, will override repository data
-* `$HOME/.qrzlogin` -- required login credentials for [qrz.com](http://qrz.com/) lookup
-* `$HOME/.wunderground` -- required API key for [WUnderground](http://wundergound.com/) weather lookup
+* `$HOME/.qrmbot/conf/qth` -- set your default geographic coordinates, for command line use
+* `$HOME/.qrmbot/creds/hamspots` -- required login credentials for [hamspots.net](http://hamspots.net) use
+* `$HOME/.qrmbot/creds/qrz` -- required login credentials for [qrz.com](http://qrz.com/) lookup
+* `$HOME/.qrmbot/db/nicks.csv` -- irc and reddit nicknames -- optional, will override repository data
+* `$HOME/.qrmbot/keys/adsb.fi` -- key for [adsb.fi](https://adsb.fi/) aircraft tracking (optional)
+* `$HOME/.qrmbot/keys/aerisweather` -- API key for aerisweather.com
+* `$HOME/.qrmbot/keys/aprs.fi` -- required [aprs.fi](http://aprs.fi/) API key for `aprs` tool
+* `$HOME/.qrmbot/keys/bitly` -- key for [bit.ly](https://bit.ly/) API
+* `$HOME/.qrmbot/keys/clublog` -- API key for [clublog.org](https://clublog.org/)
+* `$HOME/.qrmbot/keys/coinmarketcap` -- API key for [coinmarketcap.com](https://coinmarketcap.com/)
+* `$HOME/.qrmbot/keys/deepl` -- API key for [deepl.com](https://deepl.com/) translation
+* `$HOME/.qrmbot/keys/google` -- keys for Google APIs (geocoding, translation)
+* `$HOME/.qrmbot/keys/imgur` -- API key for [imgur.com](https://imgur.com/)
+* `$HOME/.qrmbot/keys/omdbapi` -- API key for [omdbapi.com](https://www.omdbapi.com/)
 
 ## Cache files / state
 
-* `$HOME/.clublogusers.gz` -- cache of clublog.org user data
-* `$HOME/.cty.dat` -- cached DXCC data from [country-files.com](http://www.country-files.com/)
-* `$HOME/.dmr-id-repeaters.csv` -- cache of DMR repeater IDs
-* `$HOME/.dmr-id-users.csv` -- cache of DMR user IDs
-* `$HOME/.hamspotcookies` -- HTTP cookies for hamspots.net session
-* `$HOME/.icao-types` -- cache of ICAO aircraft type data
-* `$HOME/.lotw-dates.txt` -- cached LOTW upload dates
-* `$HOME/.mostwanted.txt` -- cached DXCC "most wanted" data from [clublog.org](http://clublog.org/)
-* `$HOME/.qrzcookies` -- HTTP cookies for qrz.com session
-* `$HOME/.spottimestamps` -- used for spots monitor mode; safe to remove
+* `$HOME/.qrmbot/cache/clublogusers.gz` -- cache of clublog.org user data
+* `$HOME/.qrmbot/cache/cty.dat` -- cached DXCC data from [country-files.com](http://www.country-files.com/)
+* `$HOME/.qrmbot/cache/dmr-id-repeaters.csv` -- cache of DMR repeater IDs
+* `$HOME/.qrmbot/cache/dmr-id-users.csv` -- cache of DMR user IDs
+* `$HOME/.qrmbot/cache/hamspots.cookies` -- HTTP cookies for hamspots.net session
+* `$HOME/.qrmbot/cache/icao-types` -- cache of ICAO aircraft type data
+* `$HOME/.qrmbot/cache/lotw-dates.txt` -- cached LOTW upload dates
+* `$HOME/.qrmbot/cache/mostwanted.txt` -- cached DXCC "most wanted" data from [clublog.org](http://clublog.org/)
+* `$HOME/.qrmbot/cache/qrz.cookies` -- HTTP cookies for qrz.com session
 * `$HOME/.qrmbot/cache/radmon.txt` -- cached rad monitor data; safe to remove
+* `$HOME/.qrmbot/cache/spot_timestamps` -- used for spots monitor mode; safe to remove
 * `$HOME/.qrmbot/db/spots.sqlite` -- database of user-added radio spots
 
 
@@ -116,7 +117,7 @@ needed.
 9. ~~Add [clublog log check](https://clublog.freshdesk.com/support/solutions/articles/96841-checking-logs-for-the-existence-of-a-qso) or [clublog log search](https://clublog.freshdesk.com/support/solutions/articles/3000071078-performing-a-log-search-using-json)~~
 10. Add [clublog DXCC activity data](https://clublog.freshdesk.com/support/solutions/articles/55364-activity-data-json-api)
 11. ~~Add POTA~~
-12. Move dotfiles to a dot dir
+12. ~~Move dotfiles to a dot dir~~
 13. ~~Add [clublog league status](https://bbs.km8v.com/bot/league?call=)~~
 14. ~~Add free space path loss calculation using gnu units.~~
 15. Add wavelength and frequency calculation (free space and in-wire w/ velocity factor).

@@ -1,0 +1,209 @@
+#!/usr/bin/perl -w
+#
+# Look up a game on Steam and display name, price, rating, and description.
+#
+# 2-clause BSD license.
+# Copyright (c) 2025 cjh@github. All rights reserved.
+#
+# Uses the public Steam Store API -- no API key required.
+
+use strict;
+use utf8;
+use feature 'unicode_strings';
+binmode(STDOUT, ":utf8");
+
+use JSON::PP qw( decode_json );
+use URI::Escape;
+
+use File::Basename;
+use Cwd 'realpath';
+use lib dirname(realpath(__FILE__));
+use Colors;
+use Util;
+
+my $username = $ENV{'USER'} || $ENV{'USERNAME'} || getpwuid($<);
+
+# change this to 0 to always exit with success
+our $exitnonzeroonerror = 1;
+$exitnonzeroonerror = 0 if $username eq getEggdropUID();
+
+# eggdrop doesn't split args on spaces
+@ARGV = split(' ', join(' ', @ARGV));
+
+my $useragent = "Mozilla/5.0 (compatible; qrmbot)";
+
+sub fetchJSON {
+  my $url = shift;
+  open(my $fh, '-|', "curl --max-time 10 -s -k -L -A \"$useragent\" '$url'");
+  local $/;
+  my $res = <$fh>;
+  close($fh);
+  return undef unless defined $res && $res =~ /^\s*\{/;
+  return decode_json($res);
+}
+
+# Parse --appid flag
+my $appid = undef;
+my @search_args;
+my $i = 0;
+while ($i <= $#ARGV) {
+  if ($ARGV[$i] eq "--appid" && $i + 1 <= $#ARGV) {
+    $appid = $ARGV[$i + 1];
+    $appid =~ s/[^0-9]//g;
+    $i += 2;
+  } else {
+    push @search_args, $ARGV[$i];
+    $i++;
+  }
+}
+
+# --- 1. Search Steam Store (skipped if --appid supplied) ---
+if (!defined $appid) {
+  my $query = join(" ", @search_args);
+  if (!$query || length($query) == 0) {
+    print "usage: !steam <game name>\n";
+    exit $exitnonzeroonerror;
+  }
+
+  my $enc_query = uri_escape_utf8($query);
+  my $search_url = "https://store.steampowered.com/api/storesearch/?term=${enc_query}&l=english&cc=US";
+  my $search = fetchJSON($search_url);
+
+  if (!defined $search || !defined $search->{items} || scalar(@{$search->{items}}) == 0) {
+    print "not found: $query\n";
+    exit 0;
+  }
+
+  # Pick first result that is an app (prefer game over DLC/video/etc.)
+  my $item;
+  foreach my $si (@{$search->{items}}) {
+    if (defined($si->{type}) && $si->{type} eq "app") {
+      $item = $si;
+      last;
+    }
+  }
+  $item = $search->{items}[0] unless defined $item;
+  $appid = $item->{id};
+}
+
+# --- 2. Fetch app details ---
+my $detail_url = "https://store.steampowered.com/api/appdetails?appids=${appid}&l=english&cc=US";
+my $detail_j   = fetchJSON($detail_url);
+
+if (!defined $detail_j || !$detail_j->{$appid}{success} || !defined $detail_j->{$appid}{data}) {
+  print "error: could not retrieve details for appid $appid\n";
+  exit $exitnonzeroonerror;
+}
+
+my $data = $detail_j->{$appid}{data};
+my $name = $data->{name};
+
+# Price
+my $colored_price;
+if ($data->{is_free}) {
+  $colored_price = green("Free");
+} elsif (defined $data->{price_overview}) {
+  my $disc = $data->{price_overview}{discount_percent} // 0;
+  if ($disc > 0) {
+    my $orig = $data->{price_overview}{initial_formatted};
+    my $final = $data->{price_overview}{final_formatted};
+    $colored_price = bold($final) . green(" (-$disc% off $orig)");
+  } else {
+    $colored_price = $data->{price_overview}{final_formatted};
+  }
+} else {
+  $colored_price = "N/A";
+}
+
+# Short description -- strip HTML tags and decode entities
+my $desc = $data->{short_description} // "";
+$desc =~ s/<[^>]+>//g;
+$desc = decodeEntities($desc);
+$desc =~ s/\s+/ /g;
+$desc =~ s/^\s+|\s+$//g;
+if (length($desc) > 200) {
+  $desc = substr($desc, 0, 197) . "...";
+}
+
+# --- 3. Fetch review summary ---
+my $review_url = "https://store.steampowered.com/appreviews/${appid}?json=1&language=all&purchase_type=all";
+my $review_j   = fetchJSON($review_url);
+
+my ($review_desc, $review_pct, $review_total) = ("", "", 0);
+if (defined $review_j && defined $review_j->{query_summary}) {
+  my $qs = $review_j->{query_summary};
+  $review_desc  = $qs->{review_score_desc} // "";
+  my $pos       = $qs->{total_positive} // 0;
+  $review_total = $qs->{total_reviews}  // 0;
+  if ($review_total > 0) {
+    $review_pct = int($pos / $review_total * 100 + 0.5) . "%";
+  }
+}
+
+# Metacritic (from detail response -- available regardless of how appid was obtained)
+my $metascore = "";
+if (defined $data->{metacritic} && defined $data->{metacritic}{score}) {
+  $metascore = $data->{metacritic}{score};
+}
+
+# Build colored rating string
+my $colored_rating = "";
+if ($review_desc && $review_pct) {
+  (my $count_fmt = $review_total) =~ s/(\d)(?=(\d{3})+(?!\d))/$1,/g;
+  my $review_str = "$review_desc ($review_pct \x{00B7} $count_fmt reviews)";
+  if ($review_desc =~ /Overwhelmingly Positive|Very Positive/i) {
+    $colored_rating = green($review_str);
+  } elsif ($review_desc =~ /Mostly Positive|^Positive$/i) {
+    $colored_rating = lightgreen($review_str);
+  } elsif ($review_desc =~ /Mixed/i) {
+    $colored_rating = yellow($review_str);
+  } elsif ($review_desc =~ /Negative/i) {
+    $colored_rating = red($review_str);
+  } else {
+    $colored_rating = $review_str;
+  }
+} elsif ($review_desc) {
+  $colored_rating = $review_desc;
+}
+if ($metascore ne "") {
+  my $meta_colored;
+  if ($metascore >= 80) {
+    $meta_colored = green("Metacritic: $metascore");
+  } elsif ($metascore >= 60) {
+    $meta_colored = yellow("Metacritic: $metascore");
+  } else {
+    $meta_colored = red("Metacritic: $metascore");
+  }
+  $colored_rating .= " | " if $colored_rating;
+  $colored_rating .= $meta_colored;
+}
+$colored_rating = "No ratings yet" unless $colored_rating;
+
+# --- 4. Fetch ProtonDB tier ---
+my $proton_url = "https://www.protondb.com/api/v1/reports/summaries/${appid}.json";
+my $proton_j   = fetchJSON($proton_url);
+my $proton_str = "";
+if (defined $proton_j && defined $proton_j->{tier}) {
+  my $tier = lc($proton_j->{tier});
+  my $label = ucfirst($tier);
+  if    ($tier eq "native")   { $proton_str = green($label); }
+  elsif ($tier eq "platinum") { $proton_str = lightGrey($label); }
+  elsif ($tier eq "gold")     { $proton_str = yellow($label); }
+  elsif ($tier eq "silver")   { $proton_str = grey($label); }
+  elsif ($tier eq "bronze")   { $proton_str = darkYellow($label); }
+  elsif ($tier eq "borked")   { $proton_str = red($label); }
+  else                        { $proton_str = grey($label); }  # pending / unknown
+  $proton_str = "ProtonDB: $proton_str";
+}
+
+# --- Output ---
+my $sep = " \x{00B7} ";  # · middle dot separator
+print "🎮 " . bold($name);
+print $sep . $colored_price;
+print $sep . $colored_rating;
+print $sep . $proton_str if $proton_str;
+print $sep . italic($desc) if $desc;
+print $sep . "https://s.team/a/$appid";
+print "\n";
+
+exit 0;

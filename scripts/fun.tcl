@@ -6,57 +6,13 @@
 # Copyright (c) 2019 OliverUK. All rights reserved.
 # Copyright (c) 2021, 2022 molo1134@github. All rights reserved.
 
-bind pub - !phonetics phoneticise
-bind pub - !phoneticise phoneticise
-bind pub - !phoneticize phoneticise
-bind pub - !metard metard
-bind pub - !truck truck
-bind pub - !friday friday
-bind pub - !aaa aaaaaaa
-bind pub - !really really
-bind pub - !ooo ooooooo
-bind pub - !monke robface
-bind pub - !robface robface
-bind pub - !monkee daveface
-bind pub - !rick rickface
-bind pub - !burn burn
-bind pub - !brexit brexit
-bind pub - !trumpfine trumpfine
-bind pub - !christmas christmas
-bind pub - !halloween spooky
-bind pub - !spooky spooky
-bind pub - !translate translate
-bind pub - !primaries primaries
-bind pub - !fivethirtyeight fivethirtyeight_pub
-bind pub - !538 fivethirtyeight_pub
-bind msg - !fivethirtyeight fivethirtyeight_msg
-bind msg - !538 fivethirtyeight_msg
-bind pub - !senate senate_pub
-bind msg - !senate senate_msg
-bind pub - !house house_pub
-bind msg - !house house_msg
-bind pub - !gov gov_pub
-bind msg - !gov gov_msg
-bind pub - !governor gov_pub
-bind msg - !governor gov_msg
-bind pub - !github github
-bind msg - !github msg_github
-bind pub - !winadmin winadmin
-
-
-set phoneticsbin "/home/eggdrop/bin/phoneticise"
-set brexitbin "/home/eggdrop/bin/brexit"
-set trumpfinebin "/home/eggdrop/bin/trumpfine"
-set translatebin "/home/eggdrop/bin/translate"
-set primariesbin "/home/eggdrop/bin/primaries"
-set fivethirtyeightbin "/home/eggdrop/bin/fivethirtyeight"
-set winadminbin "/home/eggdrop/bin/winadmin"
-
-set githublink "https://github.com/molo1134/qrmbot/"
-
 # load utility methods
 source scripts/util.tcl
 
+bind pub - !phonetics phoneticise
+bind pub - !phoneticise phoneticise
+bind pub - !phoneticize phoneticise
+set phoneticsbin "/home/eggdrop/bin/phoneticise"
 proc phoneticise { nick host hand chan text } {
 	global phoneticsbin
 	set param [sanitize_string [string trim "${text}"]]
@@ -93,7 +49,6 @@ proc msg_colortest {nick uhand handle input} {
 
 bind pub - !debt debt_pub
 bind msg - !debt debt_msg
-
 set debtbin "/home/eggdrop/bin/debt"
 proc debt_msg {nick uhand handle input} {
 	global debtbin
@@ -220,7 +175,6 @@ proc cape_msg {nick uhand handle input} {
 	launch_msg "$nick" $uhand $handle "--cape"
 }
 
-
 bind pub - !stock stock_pub
 bind msg - !stock stock_msg
 bind pub - !s stock_pub
@@ -300,6 +254,7 @@ proc do_wwv_beep_pub { chan } {
 	putchan $chan "<beep>"
 }
 
+bind pub - !metard metard
 proc metard { nick host hand chan text} {
 	if [string equal "#amateurradio" $chan] then {
 		return
@@ -311,6 +266,7 @@ proc metard { nick host hand chan text} {
 	}
 }
 
+bind pub - !truck truck
 proc truck { nick host hand chan text} {
 	if [string equal "#amateurradio" $chan] then {
 		return
@@ -318,6 +274,7 @@ proc truck { nick host hand chan text} {
 	putchan $chan "truck you, $nick"
 }
 
+bind pub - !friday friday
 proc friday { nick host hand chan text} {
 	if [string equal "#amateurradio" $chan] then {
 		return
@@ -325,6 +282,7 @@ proc friday { nick host hand chan text} {
 	putchan $chan "Fri-Yay! https://www.youtube.com/watch?v=kfVsfOSbJY0"
 }
 
+bind pub - !ooo ooooooo
 proc ooooooo { nick host hand chan text} {
 	if [string equal "#amateurradio" $chan] then {
 		return
@@ -337,6 +295,7 @@ proc ooooooo { nick host hand chan text} {
 	}
 }
 
+bind pub - !aaa aaaaaaa
 proc aaaaaaa { nick host hand chan text} {
 	if [string equal "#amateurradio" $chan] then {
 		return
@@ -351,19 +310,31 @@ proc aaaaaaa { nick host hand chan text} {
 	}
 }
 
+bind pub - !proud proud
+proc proud { nick host hand chan text} {
+	if [string equal "#amateurradio" $chan] then {
+		return
+	}
+	putchan $chan "https://i.imgur.com/1y8bOzN.mp4"
+}
+
+bind pub - !really really
 proc really { nick host hand chan text} {
 	if [string equal "#amateurradio" $chan] then {
 		return
 	}
 
 	if [ expr (rand()*100) <= 1 ] then {
-		putchan $chan "https://i.imgur.com/ygyYn1n.mp4"  
+		putchan $chan "https://i.imgur.com/ygyYn1n.mp4"
 	} elseif [ expr (rand()*10) <= 3 ] then {
 		putchan $chan "https://i.imgur.com/icBPoib.mp4"
 	} else {
 		putchan $chan "https://i.imgur.com/Wok2ms7.mp4"
 	}
 }
+
+bind pub - !monke robface
+bind pub - !robface robface
 proc robface { nick host hand chan text} {
 	if [string equal "#amateurradio" $chan] then {
 		return
@@ -372,18 +343,32 @@ proc robface { nick host hand chan text} {
 	putchan $chan "https://i.imgur.com/cS9qmCH.jpg"
 }
 
+bind pub - !rick rickface
 proc rickface { nick host hand chan text} {
 	if [string equal "#amateurradio" $chan] then {
 		return
 	}
 
- 	if [string equal "#dayton" $chan] then {
-  		putchan $chan "https://i.imgur.com/rWqnVT1.png"
+	if [string equal "#dayton" $chan] then {
+		putchan $chan "https://i.imgur.com/rWqnVT1.png"
 	} else {
- 		putchan $chan "https://i.imgur.com/VmiWh7r.png"
- 	}
+		putchan $chan "https://i.imgur.com/VmiWh7r.png"
+	}
 }
 
+bind pub - !goose goose
+proc goose { nick host hand chan text} {
+	if [string equal "#amateurradio" $chan] then {
+		return
+	}
+	if [ expr (rand()*10) <= 1 ] then {
+		putchan $chan "https://i.imgur.com/fBIYpa2.png"
+	} else {
+		putchan $chan "https://i.imgur.com/B4WRvHE.jpeg"
+	}
+}
+
+bind pub - !monkee daveface
 proc daveface { nick host hand chan text} {
 	if [string equal "#amateurradio" $chan] then {
 		return
@@ -402,6 +387,7 @@ proc junk { nick host hand chan text} {
 }
 
 
+bind pub - !burn burn
 proc burn { nick host hand chan text} {
 	if [string equal "#amateurradio" $chan] then {
 		return
@@ -411,6 +397,8 @@ proc burn { nick host hand chan text} {
 	putchan $chan "🔥 sick burn bro - https://i.imgur.com/rK6Oj0P.png"
 }
 
+bind pub - !brexit brexit
+set brexitbin "/home/eggdrop/bin/brexit"
 proc brexit { nick host hand chan text } {
 	if [string equal "#amateurradio" $chan] then {
 		return
@@ -425,34 +413,7 @@ proc brexit { nick host hand chan text } {
 	close $fd
 }
 
-proc winadmin { nick host hand chan text } {
-	if [string equal "#amateurradio" $chan] then {
-		return
-	}
-	global winadminbin
-	putlog "winadmin: $nick $host $hand $chan"
-	set fd [open "|${winadminbin}" r]
-	fconfigure $fd -encoding utf-8
-	while {[gets $fd line] >= 0} {
-		putchan $chan "$line"
-	}
-	close $fd
-}
-
-proc trumpfine { nick host hand chan text } {
-	if [string equal "#amateurradio" $chan] then {
-		return
-	}
-	global trumpfinebin
-	putlog "trumpfine: $nick $host $hand $chan"
-	set fd [open "|${trumpfinebin}" r]
-	fconfigure $fd -encoding utf-8
-	while {[gets $fd line] >= 0} {
-		putchan $chan "$line"
-	}
-	close $fd
-}
-
+bind pub - !christmas christmas
 set christmasbin "/home/eggdrop/bin/christmas"
 proc christmas { nick host hand chan text } {
 	if [string equal "#amateurradio" $chan] then {
@@ -468,6 +429,8 @@ proc christmas { nick host hand chan text } {
 	close $fd
 }
 
+bind pub - !halloween spooky
+bind pub - !spooky spooky
 set spookybin "/home/eggdrop/bin/spooky"
 proc spooky { nick host hand chan text } {
 	if [string equal "#amateurradio" $chan] then {
@@ -476,23 +439,6 @@ proc spooky { nick host hand chan text } {
 	global spookybin
 	putlog "spooky: $nick $host $hand $chan"
 	set fd [open "|${spookybin}" r]
-	fconfigure $fd -encoding utf-8
-	while {[gets $fd line] >= 0} {
-		putchan $chan "$line"
-	}
-	close $fd
-}
-
-bind pub - !potus potus
-bind pub - !trumpectomy potus
-set potusbin "/home/eggdrop/bin/potus"
-proc potus { nick host hand chan text } {
-	if [string equal "#amateurradio" $chan] then {
-		return
-	}
-	global potusbin
-	putlog "potus: $nick $host $hand $chan"
-	set fd [open "|${potusbin}" r]
 	fconfigure $fd -encoding utf-8
 	while {[gets $fd line] >= 0} {
 		putchan $chan "$line"
@@ -509,6 +455,8 @@ proc chars2hexlist {string} {
 	set list; # faster than return...
 }
 
+bind pub - !translate translate
+set translatebin "/home/eggdrop/bin/translate"
 proc translate { nick host hand chan text } {
 	global translatebin
 
@@ -524,210 +472,6 @@ proc translate { nick host hand chan text } {
 	fconfigure $fd -encoding utf-8
 	while {[gets $fd line] >= 0} {
 		putchan $chan "${line}"
-	}
-	close $fd
-}
-
-bind pub - !qrm chatgpt
-set chatgptbin "/home/eggdrop/bin/chatgpt"
-proc chatgpt { nick host hand chan text } {
-	global chatgptbin
-
-	set cleantext [sanitize_string [string trim "${text}"]]
-
-	putlog "chatgpt pub: $nick $host $hand $chan $cleantext"
-
-	set fd [open "|${chatgptbin} ${cleantext}" r]
-	fconfigure $fd -encoding utf-8
-	while {[gets $fd line] >= 0} {
-		putchan $chan "${line}"
-	}
-	close $fd
-}
-
-bind pub - !corona corona_pub
-bind pub - !covid corona_pub
-bind pub - !covid19 corona_pub
-bind pub - !c19 corona_pub
-bind msg - !corona corona_msg
-bind msg - !covid corona_msg
-bind msg - !covid19 corona_msg
-bind msg - !c19 corona_msg
-set coronabin "/home/eggdrop/bin/corona"
-proc corona_pub { nick host hand chan text } {
-	if [string equal "#amateurradio" $chan] then {
-		return
-	}
-	global coronabin
-	set cleantext [sanitize_string [string trim "${text}"]]
-	putlog "corona pub: $nick $host $hand $chan $cleantext"
-	set fd [open "|${coronabin} ${cleantext}" r]
-	fconfigure $fd -encoding utf-8
-	while {[gets $fd line] >= 0} {
-		putchan $chan "$line"
-	}
-	close $fd
-}
-proc corona_msg {nick uhand handle input} {
-	global coronabin
-	set param [sanitize_string [string trim "${input}"]]
-	putlog "corona msg: $nick $uhand $handle $param"
-	set fd [open "|${coronabin} ${param} " r]
-	fconfigure $fd -encoding utf-8
-	while {[gets $fd line] >= 0} {
-		putmsg "$nick" "$line"
-	}
-	close $fd
-}
-
-proc primaries { nick host hand chan text } {
-	if [string equal "#amateurradio" $chan] then {
-		return
-	}
-	global primariesbin
-	set cleantext [sanitize_string [string trim "${text}"]]
-	putlog "primaries: $nick $host $hand $chan $cleantext"
-	set fd [open "|${primariesbin} ${cleantext}" r]
-	fconfigure $fd -encoding utf-8
-	while {[gets $fd line] >= 0} {
-		putchan $chan "$line"
-	}
-	close $fd
-}
-
-proc fivethirtyeight_pub { nick host hand chan text } {
-	if [string equal "#amateurradio" $chan] then {
-		return
-	}
-	global fivethirtyeightbin
-	set param [sanitize_string [string trim "${text}"]]
-	putlog "fivethirtyeight pub: $nick $host $hand $chan $param"
-	set fd [open "|${fivethirtyeightbin} ${param}" r]
-	fconfigure $fd -encoding utf-8
-	while {[gets $fd line] >= 0} {
-		putchan $chan "$line"
-	}
-	close $fd
-}
-proc fivethirtyeight_msg {nick uhand handle input} {
-	global fivethirtyeightbin
-	set param [sanitize_string [string trim "${input}"]]
-	putlog "fivethirtyeight msg: $nick $uhand $handle $param"
-	set fd [open "|${fivethirtyeightbin} ${param}" r]
-	fconfigure $fd -encoding utf-8
-	while {[gets $fd line] >= 0} {
-		putmsg "$nick" "$line"
-	}
-	close $fd
-}
-proc senate_pub { nick host hand chan text } {
-	if [string equal "#amateurradio" $chan] then {
-		return
-	}
-	global fivethirtyeightbin
-	set param [sanitize_string [string trim "${text}"]]
-	putlog "senate pub: $nick $host $hand $chan $param"
-	set fd [open "|${fivethirtyeightbin} --senate ${param}" r]
-	fconfigure $fd -encoding utf-8
-	while {[gets $fd line] >= 0} {
-		putchan $chan "$line"
-	}
-	close $fd
-}
-proc senate_msg {nick uhand handle input} {
-	global fivethirtyeightbin
-	set param [sanitize_string [string trim "${input}"]]
-	putlog "senate msg: $nick $uhand $handle $param"
-	set fd [open "|${fivethirtyeightbin} --senate ${param}" r]
-	fconfigure $fd -encoding utf-8
-	while {[gets $fd line] >= 0} {
-		putmsg "$nick" "$line"
-	}
-	close $fd
-}
-proc house_pub { nick host hand chan text } {
-	if [string equal "#amateurradio" $chan] then {
-		return
-	}
-	global fivethirtyeightbin
-	set param [sanitize_string [string trim "${text}"]]
-	putlog "house pub: $nick $host $hand $chan $param"
-	set fd [open "|${fivethirtyeightbin} --house ${param}" r]
-	fconfigure $fd -encoding utf-8
-	while {[gets $fd line] >= 0} {
-		putchan $chan "$line"
-	}
-	close $fd
-}
-proc house_msg {nick uhand handle input} {
-	global fivethirtyeightbin
-	set param [sanitize_string [string trim "${input}"]]
-	putlog "house msg: $nick $uhand $handle $param"
-	set fd [open "|${fivethirtyeightbin} --house ${param}" r]
-	fconfigure $fd -encoding utf-8
-	while {[gets $fd line] >= 0} {
-		putmsg "$nick" "$line"
-	}
-	close $fd
-}
-proc gov_pub { nick host hand chan text } {
-	if [string equal "#amateurradio" $chan] then {
-		return
-	}
-	global fivethirtyeightbin
-	set param [sanitize_string [string trim "${text}"]]
-	putlog "gov pub: $nick $host $hand $chan $param"
-	set fd [open "|${fivethirtyeightbin} --gov ${param}" r]
-	fconfigure $fd -encoding utf-8
-	while {[gets $fd line] >= 0} {
-		putchan $chan "$line"
-	}
-	close $fd
-}
-proc gov_msg {nick uhand handle input} {
-	global fivethirtyeightbin
-	set param [sanitize_string [string trim "${input}"]]
-	putlog "gov msg: $nick $uhand $handle $param"
-	set fd [open "|${fivethirtyeightbin} --gov ${param}" r]
-	fconfigure $fd -encoding utf-8
-	while {[gets $fd line] >= 0} {
-		putmsg "$nick" "$line"
-	}
-	close $fd
-}
-
-bind pub - !ammo ammo_pub
-bind msg - !ammo ammo_msg
-set ammobin "/home/eggdrop/bin/ammo"
-proc ammo_pub { nick host hand chan text } {
-	if [string equal "#amateurradio" $chan] then {
-		return
-	}
-	global ammobin
-	set param [sanitize_string [string trim "${text}"]]
-	putlog "ammo pub: $nick $host $hand $chan $param"
-	set params [split $param]
-	set count [lindex $params 1]
-	if { $count > 3 } {
-		lset params 1 "3"
-		set param [join $params]
-	}
-
-	set fd [open "|${ammobin} ${param} " r]
-	fconfigure $fd -encoding utf-8
-	while {[gets $fd line] >= 0} {
-		putchan $chan "$line"
-	}
-	close $fd
-}
-proc ammo_msg {nick uhand handle input} {
-	global ammobin
-	set param [sanitize_string [string trim "${input}"]]
-	putlog "ammo msg: $nick $uhand $handle $param"
-	set fd [open "|${ammobin} ${param} " r]
-	fconfigure $fd -encoding utf-8
-	while {[gets $fd line] >= 0} {
-		putmsg "$nick" "$line"
 	}
 	close $fd
 }
@@ -759,7 +503,7 @@ proc dice_pub { nick host hand chan text } {
 	rando_pub "$nick" $host $hand $chan "--dice"
 }
 bind pub - !8ball eightball_pub
-bind pub - !orb eightball_pub
+bind pub - !orb orb_pub
 bind pub - !magic8ball eightball_pub
 bind pub - !eightball eightball_pub
 proc eightball_pub { nick host hand chan text } {
@@ -767,6 +511,12 @@ proc eightball_pub { nick host hand chan text } {
 		return
 	}
 	rando_pub "$nick" $host $hand $chan "--8ball"
+}
+proc orb_pub { nick host hand chan text } {
+	if [string equal "#amateurradio" $chan] then {
+		return
+	}
+	rando_pub "$nick" $host $hand $chan "--orb"
 }
 bind pub - !card card_pub
 proc card_pub { nick host hand chan text } {
@@ -815,10 +565,10 @@ proc poker_pub { nick host hand chan text } {
 	    putchan $chan "Need 10 or fewer players to deal a hand (blame W2XG)"
 	    return
 	}
-	
+
 	# Default to 5 cards for poker
 	set drawcmd "5 ${param}"
-	
+
 	# Collect the output from rando (card dealing)
 	set poker_input ""
 	set fd [open "|${randobin} --draw ${drawcmd}" r]
@@ -828,7 +578,7 @@ proc poker_pub { nick host hand chan text } {
 		append poker_input "$line "
 	}
 	close $fd
-	
+
 	# Now evaluate the poker hands
 	if {$poker_input ne ""} {
 		set fd2 [open "|${pokerbin} ${poker_input}" r]
@@ -842,12 +592,23 @@ proc poker_pub { nick host hand chan text } {
 
 # load imgur api key if present
 set imgur_key ""
-set imgurfile [file join $env(HOME) ".imgurkey"]
+set imgurfile [file join $env(HOME) ".qrmbot/keys/imgur"]
 if {[file exists $imgurfile]} {
     set fd [open $imgurfile r]
     set file_content [read $fd]
     close $fd
     regexp {imgur_key="([^"]+)"} $file_content -> imgur_key
+    unset file_content
+} else {
+  # fallback
+  set imgurfile [file join $env(HOME) ".imgurkey"]
+  if {[file exists $imgurfile]} {
+      set fd [open $imgurfile r]
+      set file_content [read $fd]
+      close $fd
+      regexp {imgur_key="([^"]+)"} $file_content -> imgur_key
+      unset file_content
+  }
 }
 
 # load scraping ant api key if present
@@ -858,6 +619,7 @@ if {[file exists $scrapingantfile]} {
     set file_content [read $fd]
     close $fd
     regexp {scrapingant_key="([^"]+)"} $file_content -> scrapingant_key
+    unset file_content
 }
 
 proc getSubredditImage {subreddit} {
@@ -982,6 +744,7 @@ proc amcon_msg {nick uhand handle input} {
 
 set amcornbin "/home/eggdrop/bin/amcorn"
 bind pub - !amcorn amcorn_pub
+bind pub - !corn amcorn_pub
 proc amcorn_pub { nick host hand chan text } {
 	if [string equal "#amateurradio" $chan] then {
 		return
@@ -1017,6 +780,9 @@ proc argpeso_pub { nick host hand chan text } {
 }
 
 
+bind pub - !github github
+bind msg - !github msg_github
+set githublink "https://github.com/molo1134/qrmbot/"
 proc github { nick host hand chan text } {
 	global githublink
 	putlog "github pub: $nick $host $hand $chan"
@@ -1050,6 +816,108 @@ proc imdb_msg {nick uhand handle input} {
 	set param [sanitize_string [string trim "${input}"]]
 	putlog "imdb msg: $nick $uhand $handle $param"
 	set fd [open "|${imdbbin} ${param} " r]
+	fconfigure $fd -encoding utf-8
+	while {[gets $fd line] >= 0} {
+		putmsg "$nick" "$line"
+	}
+	close $fd
+}
+
+bind pub - !steam steam_pub
+bind msg - !steam steam_msg
+set steambin "/home/eggdrop/bin/steam"
+proc steam_pub { nick host hand chan text } {
+	global steambin
+	set query [sanitize_string [string trim "${text}"]]
+	putlog "steam pub: $nick $host $hand $chan $query"
+	if [string equal "" $query] then {
+		putchan $chan "usage: !steam <game name>"
+		return
+	}
+	set fd [open "|${steambin} ${query}" r]
+	fconfigure $fd -encoding utf-8
+	while {[gets $fd line] >= 0} {
+		putchan $chan "$line"
+	}
+	close $fd
+}
+proc steam_msg { nick uhand handle input } {
+	global steambin
+	set query [sanitize_string [string trim "${input}"]]
+	putlog "steam msg: $nick $uhand $handle $query"
+	if [string equal "" $query] then {
+		putmsg "$nick" "usage: !steam <game name>"
+		return
+	}
+	set fd [open "|${steambin} ${query}" r]
+	fconfigure $fd -encoding utf-8
+	while {[gets $fd line] >= 0} {
+		putmsg "$nick" "$line"
+	}
+	close $fd
+}
+
+bind pub - !polymarket polymarket_pub
+bind msg - !polymarket polymarket_msg
+set polymarketbin "/home/eggdrop/bin/polymarket"
+proc polymarket_pub { nick host hand chan text } {
+	global polymarketbin
+	set query [sanitize_string [string trim "${text}"]]
+	putlog "polymarket pub: $nick $host $hand $chan $query"
+	if [string equal "" $query] then {
+		putchan $chan "usage: !polymarket <search term>"
+		return
+	}
+	set fd [open "|${polymarketbin} ${query}" r]
+	fconfigure $fd -encoding utf-8
+	while {[gets $fd line] >= 0} {
+		putchan $chan "$line"
+	}
+	close $fd
+}
+proc polymarket_msg { nick uhand handle input } {
+	global polymarketbin
+	set query [sanitize_string [string trim "${input}"]]
+	putlog "polymarket msg: $nick $uhand $handle $query"
+	if [string equal "" $query] then {
+		putmsg "$nick" "usage: !polymarket <search term>"
+		return
+	}
+	set fd [open "|${polymarketbin} ${query}" r]
+	fconfigure $fd -encoding utf-8
+	while {[gets $fd line] >= 0} {
+		putmsg "$nick" "$line"
+	}
+	close $fd
+}
+
+bind pub - !book book_pub
+bind msg - !book book_msg
+set bookbin "/home/eggdrop/bin/book"
+proc book_pub { nick host hand chan text } {
+	global bookbin
+	set query [sanitize_string [string trim "${text}"]]
+	putlog "book pub: $nick $host $hand $chan $query"
+	if [string equal "" $query] then {
+		putchan $chan "usage: !book <title or author>"
+		return
+	}
+	set fd [open "|${bookbin} ${query}" r]
+	fconfigure $fd -encoding utf-8
+	while {[gets $fd line] >= 0} {
+		putchan $chan "$line"
+	}
+	close $fd
+}
+proc book_msg { nick uhand handle input } {
+	global bookbin
+	set query [sanitize_string [string trim "${input}"]]
+	putlog "book msg: $nick $uhand $handle $query"
+	if [string equal "" $query] then {
+		putmsg "$nick" "usage: !book <title or author>"
+		return
+	}
+	set fd [open "|${bookbin} ${query}" r]
 	fconfigure $fd -encoding utf-8
 	while {[gets $fd line] >= 0} {
 		putmsg "$nick" "$line"
@@ -1107,21 +975,21 @@ proc diesel_msg {nick uhand handle input} {
 #bind pub - !ud ud_pub
 bind msg - !ud ud_msg
 set udbin "/home/eggdrop/bin/ud"
-proc ud_pub { nick host hand chan text } {
-	return
-	if [string equal "#amateurradio" $chan] then {
-		return
-	}
-	global udbin
-	set cleantext [sanitize_string [string trim "${text}"]]
-	putlog "ud pub: $nick $host $hand $chan $cleantext"
-	set fd [open "|${udbin} ${cleantext}" r]
-	fconfigure $fd -encoding utf-8
-	while {[gets $fd line] >= 0} {
-		putchan $chan "$line"
-	}
-	close $fd
-}
+## removed due to abuse
+#proc ud_pub { nick host hand chan text } {
+#	if [string equal "#amateurradio" $chan] then {
+#		return
+#	}
+#	global udbin
+#	set cleantext [sanitize_string [string trim "${text}"]]
+#	putlog "ud pub: $nick $host $hand $chan $cleantext"
+#	set fd [open "|${udbin} ${cleantext}" r]
+#	fconfigure $fd -encoding utf-8
+#	while {[gets $fd line] >= 0} {
+#		putchan $chan "$line"
+#	}
+#	close $fd
+#}
 proc ud_msg {nick uhand handle input} {
 	global udbin
 	set param [sanitize_string [string trim "${input}"]]
@@ -1252,12 +1120,13 @@ set yellowjacket_facts {
   {Early in the year, yellowjackets seek protein.}
   {Late in the year, yellowjackets crave sugar.}
   {Yellowjackets aggressively defend their nests.}
-  {Yellowjacket larvae feed workers sugary liquids.}
+  {Yellowjacket larvae feed workers sugary liquids in exchange for raw meat the workers bring them.}
   {In late summer, yellowjackets produce new queens and males.}
   {Only the yellowjacket queen survives the winter.}
   {Most yellowjacket nests have a single guarded entrance.}
   {Yellowjackets chew into fruit to reach the juice.}
   {Cool mornings slow yellowjacket activity.}
+  {If you squish a yellowjacket, it releases a death pheromone that acts like a chemical alarm.}
 }
 
 proc brad {nick host hand chan text} {
@@ -1321,141 +1190,426 @@ proc masters { nick host hand chan text } {
         close $fd
 }
 
-# --- Shart Timer ---
-set shart_data_file "shart_timestamp.txt"
-set shart_timestamp 0
-set shart_nick ""
-set pending_shart_nick ""
-set pending_shart_time 0
+# ============================================================================
+# Generic Event Timer Engine
+# Supports any number of named events (shart, hangover, puke, ...).
+# Each event gets its own set of IRC commands and persistent data files.
+#
+# Data files (one pair per event):
+#   <event>_timestamp.txt  — last event time and nick (2-line text)
+#   <event>_metrics.txt    — monthly counts: "nick year month count" per line
+#
+# IRC commands registered for each event:
+#   !<event>              — show elapsed time since last event
+#   !<event>reset <nick>  — request a timer reset for <nick>
+#   !<event>confirm       — confirm a pending reset (only the named nick)
+#   !<event>status        — show pending reset request status
+#   !<event>league [year] — leaderboard for the year
+#   !<event>yearreview [nick] [year] — monthly breakdown
+#   !<event>history       — all-time totals by year
+# ============================================================================
 
-# Load saved shart timestamp and nickname on start
-if {[file exists $shart_data_file]} {
-    set fp [open $shart_data_file r]
-    set data [split [read $fp] "\n"]
-    close $fp
-    if {[llength $data] >= 2} {
-        set shart_timestamp [lindex $data 0]
-        set shart_nick [lindex $data 1]
+# State arrays — indexed by event name
+array set et_timestamp    {}
+array set et_nick         {}
+array set et_pending_nick {}
+array set et_pending_time {}
+# Monthly metrics: key is "event,nick@year@month", value is count
+array set et_monthly      {}
+
+proc et_data_file    {event} { return "${event}_timestamp.txt" }
+proc et_metrics_file {event} { return "${event}_metrics.txt" }
+
+proc et_load_data {event} {
+    global et_timestamp et_nick
+    set f [et_data_file $event]
+    if {[file exists $f]} {
+        set fp [open $f r]
+        set data [split [read $fp] "\n"]
+        close $fp
+        if {[llength $data] >= 2} {
+            set et_timestamp($event) [lindex $data 0]
+            set et_nick($event)      [lindex $data 1]
+            putlog "Loaded last $event: $et_timestamp($event) $et_nick($event)"
+        }
+        unset data
+    }
+    if {![info exists et_timestamp($event)]} { set et_timestamp($event) 0  }
+    if {![info exists et_nick($event)]}      { set et_nick($event)      "" }
+}
+
+proc et_load_metrics {event} {
+    global et_monthly
+    set f [et_metrics_file $event]
+    if {[file exists $f]} {
+        set fp [open $f r]
+        set raw [read $fp]
+        close $fp
+        foreach line [split $raw "\n"] {
+            if {[string trim $line] ne ""} {
+                set parts [split $line " "]
+                if {[llength $parts] >= 4} {
+                    set mnick [string tolower [lindex $parts 0]]
+                    set year  [lindex $parts 1]
+                    set month [lindex $parts 2]
+                    set count [lindex $parts 3]
+                    set key   "${event},${mnick}@${year}@${month}"
+                    set et_monthly($key) $count
+                }
+            }
+        }
+        unset raw
     }
 }
 
-proc save_shart_data {} {
-    global shart_timestamp shart_nick shart_data_file
-    set fp [open $shart_data_file w]
-    puts $fp "$shart_timestamp\n$shart_nick"
+proc et_save_data {event} {
+    global et_timestamp et_nick
+    set fp [open [et_data_file $event] w]
+    puts $fp "$et_timestamp($event)\n$et_nick($event)"
     close $fp
 }
 
-# --- Request Reset ---
-proc shartreset {nick uhost hand chan text} {
-    if [string equal "#amateurradio" $chan] then {
-        return
+proc et_save_metrics {event} {
+    global et_monthly
+    set fp [open [et_metrics_file $event] w]
+    set prefix "${event},"
+    set plen [string length $prefix]
+    foreach key [array names et_monthly "${prefix}*"] {
+        set rest  [string range $key $plen end]
+        set parts [split $rest "@"]
+        set mnick [lindex $parts 0]
+        set year  [lindex $parts 1]
+        set month [lindex $parts 2]
+        puts $fp "$mnick $year $month $et_monthly($key)"
     }
-    global pending_shart_nick pending_shart_time
+    close $fp
+}
 
+proc et_record_event {event confirmnick} {
+    global et_monthly
+    set now   [clock seconds]
+    set year  [clock format $now -format "%Y"]
+    set month [clock format $now -format "%m"]
+    set key   "${event},[string tolower $confirmnick]@${year}@${month}"
+    if {[info exists et_monthly($key)]} {
+        incr et_monthly($key)
+    } else {
+        set et_monthly($key) 1
+    }
+    et_save_metrics $event
+}
+
+# --- Generic command implementations ---
+
+proc et_reset {event nick uhost hand chan text} {
+    if [string equal "#amateurradio" $chan] then { return }
+    global et_pending_nick et_pending_time
+    set text [sanitize_string [string trim $text]]
+    putlog "${event}reset pub: $nick $uhost $hand $chan $text"
     if {$text eq ""} {
-        putquick "PRIVMSG $chan :$nick: You must specify a nickname! Usage: !shartreset <nickname>"
+        putchan $chan "$nick: You must specify a nickname. Usage: \u0002!${event}reset\u0002 <nickname>"
         return
     }
-
-    set pending_shart_nick $text
-    set pending_shart_time [clock seconds]
-    putquick "PRIVMSG $chan :$nick has requested to reset the shart timer for $pending_shart_nick."
-    putquick "PRIVMSG $chan :Reset request pending for $pending_shart_nick. $pending_shart_nick: Please confirm the shart with !shartconfirm within 24 hours."
+    set et_pending_nick($event) $text
+    set et_pending_time($event) [clock seconds]
+    putchan $chan "⚠️ \u0002$nick\u0002 has requested to reset the \u0002$event\u0002 timer for \u0002$et_pending_nick($event)\u0002."
+    putchan $chan "\u0002$et_pending_nick($event)\u0002: please confirm with \u0002!${event}confirm\u0002 within 24 hours."
 }
 
-# --- Confirm Shart ---
-proc shartconfirm {nick uhost hand chan text} {
-    if [string equal "#amateurradio" $chan] then {
+proc et_confirm {event nick uhost hand chan text} {
+    if [string equal "#amateurradio" $chan] then { return }
+    global et_timestamp et_nick et_pending_nick et_pending_time
+    set text [sanitize_string [string trim $text]]
+    putlog "${event}confirm pub: $nick $uhost $hand $chan $text"
+    if {$et_pending_nick($event) eq ""} {
+        putchan $chan "$nick: There is no pending \u0002$event\u0002 request."
         return
     }
-    global shart_timestamp shart_nick pending_shart_nick pending_shart_time
-
-    if {$pending_shart_nick eq ""} {
-        putquick "PRIVMSG $chan :$nick: There is no pending shart request."
-        return
-    }
-
-    # Check expiration (24h = 86400 seconds)
     set now [clock seconds]
-    if {[expr {$now - $pending_shart_time}] > 86400} {
-        putquick "PRIVMSG $chan :The shart request for $pending_shart_nick has expired (24h limit). Please request again."
-        set pending_shart_nick ""
-        set pending_shart_time 0
+    if {[expr {$now - $et_pending_time($event)}] > 86400} {
+        putchan $chan "The \u0002$event\u0002 request for \u0002$et_pending_nick($event)\u0002 has expired (24h limit). Please request again."
+        set et_pending_nick($event) ""
+        set et_pending_time($event) 0
         return
     }
-
-    if {![string equal -nocase $nick $pending_shart_nick]} {
-        putquick "PRIVMSG $chan :$nick: Only $pending_shart_nick can confirm this shart!"
+    if {![string equal -nocase $nick $et_pending_nick($event)]} {
+        putchan $chan "$nick: Only \u0002$et_pending_nick($event)\u0002 can confirm this \u0002$event\u0002!"
         return
     }
-
-    set shart_timestamp $now
-    set shart_nick $nick
-    set pending_shart_nick ""
-    set pending_shart_time 0
-    save_shart_data
-
-    putquick "PRIVMSG $chan :$nick has confirmed the shart."
+    set et_timestamp($event) $now
+    set et_nick($event)      $nick
+    set et_pending_nick($event) ""
+    set et_pending_time($event) 0
+    et_save_data $event
+    et_record_event $event $nick
+    putchan $chan "✅ \u0002$nick\u0002 has confirmed the \u0002$event\u0002. Timer reset!"
 }
 
-# --- Show Timer ---
-proc shart {nick uhost hand chan text} {
-    if [string equal "#amateurradio" $chan] then {
+proc et_show {event nick uhost hand chan text} {
+    if [string equal "#amateurradio" $chan] then { return }
+    global et_timestamp et_nick
+    set text [sanitize_string [string trim $text]]
+    putlog "${event} pub: $nick $uhost $hand $chan $text"
+    if {$et_timestamp($event) == 0 || $et_nick($event) eq ""} {
+        putchan $chan "$nick: The \u0002$event\u0002 timer hasn't been started yet! Use \u0002!${event}reset\u0002 <nickname>."
         return
     }
-    global shart_timestamp shart_nick
-
-    if {$shart_timestamp == 0 || $shart_nick eq ""} {
-        putquick "PRIVMSG $chan :$nick: The shart timer hasn't been started yet! Use !shartreset <nickname>."
-        return
-    }
-
-    set now [clock seconds]
-    set elapsed [expr {$now - $shart_timestamp}]
-
-    set weeks [expr {$elapsed / (60 * 60 * 24 * 7)}]
-    set days [expr {($elapsed / (60 * 60 * 24)) % 7}]
-    set hours [expr {($elapsed / (60 * 60)) % 24}]
+    set now     [clock seconds]
+    set elapsed [expr {$now - $et_timestamp($event)}]
+    set weeks   [expr {$elapsed / (60 * 60 * 24 * 7)}]
+    set days    [expr {($elapsed / (60 * 60 * 24)) % 7}]
+    set hours   [expr {($elapsed / (60 * 60)) % 24}]
     set minutes [expr {($elapsed / 60) % 60}]
-
-    putquick "PRIVMSG $chan :$nick: It's been $weeks week(s), $days day(s), $hours hour(s), and $minutes minute(s) since $shart_nick's last shart."
+    putchan $chan "⏱️ $nick: It's been \u0002$weeks\u0002 week(s), \u0002$days\u0002 day(s), \u0002$hours\u0002 hour(s), and \u0002$minutes\u0002 minute(s) since \u0002$et_nick($event)\u0002's last \u0002$event\u0002."
 }
 
-# --- Shart Status ---
-proc shartstatus {nick uhost hand chan text} {
-    if [string equal "#amateurradio" $chan] then {
+proc et_status {event nick uhost hand chan text} {
+    if [string equal "#amateurradio" $chan] then { return }
+    global et_pending_nick et_pending_time
+    set text [sanitize_string [string trim $text]]
+    putlog "${event}status pub: $nick $uhost $hand $chan $text"
+    if {$et_pending_nick($event) eq ""} {
+        putchan $chan "$nick: There is no pending \u0002$event\u0002 request."
         return
     }
-    global pending_shart_nick pending_shart_time
-
-    if {$pending_shart_nick eq ""} {
-        putquick "PRIVMSG $chan :$nick: There is no pending shart request."
-        return
-    }
-
-    set now [clock seconds]
-    set remaining [expr {86400 - ($now - $pending_shart_time)}]
-
+    set now       [clock seconds]
+    set remaining [expr {86400 - ($now - $et_pending_time($event))}]
     if {$remaining <= 0} {
-        putquick "PRIVMSG $chan :The shart request for $pending_shart_nick has expired."
-        set pending_shart_nick ""
-        set pending_shart_time 0
+        putchan $chan "The \u0002$event\u0002 request for \u0002$et_pending_nick($event)\u0002 has expired."
+        set et_pending_nick($event) ""
+        set et_pending_time($event) 0
         return
     }
-
-    set hours [expr {$remaining / 3600}]
+    set hours   [expr {$remaining / 3600}]
     set minutes [expr {($remaining % 3600) / 60}]
-
-    putquick "PRIVMSG $chan :A shart request is pending for $pending_shart_nick. Time left to confirm: $hours hour(s) and $minutes minute(s)."
+    putchan $chan "⏳ A \u0002$event\u0002 request is pending for \u0002$et_pending_nick($event)\u0002. Time left to confirm: \u0002${hours}h ${minutes}m\u0002."
 }
 
-# --- Command Bindings ---
-bind pub - !shartreset shartreset
-bind pub - !shartconfirm shartconfirm
-bind pub - !shart shart
-bind pub - !shartstatus shartstatus
+proc _cmp_nicks {a b} {
+    global nick_totals
+    return [expr {$nick_totals($b) - $nick_totals($a)}]
+}
 
+proc et_league {event nick uhost hand chan text} {
+    if [string equal "#amateurradio" $chan] then { return }
+    global et_monthly nick_totals
+    set text [sanitize_string [string trim $text]]
+    putlog "${event}league pub: $nick $uhost $hand $chan $text"
+    set now          [clock seconds]
+    set current_year [clock format $now -format "%Y"]
+    if {$text ne "" && [string is integer -strict $text] } { set current_year $text }
+    array set nick_totals {}
+    set prefix "${event},"
+    set plen [string length $prefix]
+    foreach key [array names et_monthly "${prefix}*"] {
+        set rest  [string range $key $plen end]
+        set parts [split $rest "@"]
+        set mnick [lindex $parts 0]
+        set year  [lindex $parts 1]
+        set count $et_monthly($key)
+        if {$year == $current_year} {
+            if {[info exists nick_totals($mnick)]} {
+                incr nick_totals($mnick) $count
+            } else {
+                set nick_totals($mnick) $count
+            }
+        }
+    }
+    if {[array size nick_totals] == 0} {
+        putchan $chan "$nick: No \u0002$event\u0002 data for $current_year yet."
+        unset nick_totals
+        return
+    }
+    set sorted_nicks [lsort -command _cmp_nicks [array names nick_totals]]
+    set medals [list "🥇" "🥈" "🥉"]
+    set rank 1
+    set parts_list {}
+    foreach mnick $sorted_nicks {
+        if {$rank <= 3} {
+            lappend parts_list "[lindex $medals [expr {$rank - 1}]] \u0002$mnick\u0002 ($nick_totals($mnick))"
+        } else {
+            lappend parts_list "$rank. \u0002$mnick\u0002 ($nick_totals($mnick))"
+        }
+        incr rank
+    }
+    unset nick_totals
+    putchan $chan "🏆 \u0002[string totitle $event] standings for $current_year:\u0002 [join $parts_list " · "]"
+}
+
+proc et_yearreview {event nick uhost hand chan text} {
+    if [string equal "#amateurradio" $chan] then { return }
+    global et_monthly
+    set text [sanitize_string [string trim $text]]
+    putlog "${event}yearreview pub: $nick $uhost $hand $chan $text"
+    set now         [clock seconds]
+    set review_year [clock format $now -format "%Y"]
+    set review_nick [string tolower $nick]
+    if {$text ne ""} {
+        set parts [split [string tolower $text]]
+        if {[llength $parts] == 2} {
+            set review_nick [lindex $parts 0]
+            set review_year [lindex $parts 1]
+        } elseif {[llength $parts] == 1} {
+            if {[string is integer -strict [lindex $parts 0]]} {
+                set review_year [lindex $parts 0]
+            } else {
+                set review_nick [lindex $parts 0]
+            }
+        }
+    }
+    set year_total 0
+    set month_data [list]
+    for {set m 1} {$m <= 12} {incr m} {
+        set month_key [format "%s,%s@%s@%02d" $event $review_nick $review_year $m]
+        set count [expr {[info exists et_monthly($month_key)] ? $et_monthly($month_key) : 0}]
+        incr year_total $count
+        lappend month_data [list $m $count]
+    }
+    if {$year_total == 0} {
+        putchan $chan "$nick: No \u0002$event\u0002 data for \u0002$review_nick\u0002 in $review_year."
+        return
+    }
+    putchan $chan "📅 \u0002[string totitle $event]\u0002 year \u0002$review_year\u0002 in review for \u0002$review_nick\u0002 — total: \u0002$year_total\u0002"
+    set month_names [list "Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"]
+    set r {}
+    foreach entry $month_data {
+        set m     [lindex $entry 0]
+        set count [lindex $entry 1]
+        if { $count > 0 } {
+            lappend r "[lindex $month_names [expr {$m - 1}]]: \u0002$count\u0002"
+        }
+    }
+    putchan $chan "[join $r " · "]"
+}
+
+proc et_history {event nick uhost hand chan text} {
+    if [string equal "#amateurradio" $chan] then { return }
+    global et_monthly
+    set text [sanitize_string [string trim $text]]
+    putlog "${event}history pub: $nick $uhost $hand $chan $text"
+    set years_data [dict create]
+    set prefix "${event},"
+    set plen [string length $prefix]
+    foreach key [array names et_monthly "${prefix}*"] {
+        set rest  [string range $key $plen end]
+        set parts [split $rest "@"]
+        set year  [lindex $parts 1]
+        set count $et_monthly($key)
+        if {[dict exists $years_data $year]} {
+            dict incr years_data $year $count
+        } else {
+            dict set years_data $year $count
+        }
+    }
+    if {[dict size $years_data] == 0} {
+        putchan $chan "$nick: No \u0002$event\u0002 history available."
+        return
+    }
+    set parts_list {}
+    foreach year [lsort -decreasing [dict keys $years_data]] {
+        lappend parts_list "$year: \u0002[dict get $years_data $year]\u0002"
+    }
+    putchan $chan "📊 \u0002[string totitle $event] history:\u0002 [join $parts_list " · "]"
+}
+
+proc et_help {event nick uhost hand chan text} {
+    if [string equal "#amateurradio" $chan] then { return }
+    putchan $chan "ℹ️ $nick: \u0002${event}\u0002 commands: \u0002!${event}\u0002 (timer) · \u0002!${event}reset\u0002 <nick> · \u0002!${event}confirm\u0002 · \u0002!${event}status\u0002 · \u0002!${event}league\u0002 \[year\] · \u0002!${event}yearreview\u0002 \[year\] · \u0002!${event}history\u0002"
+}
+
+# --- Register events ---
+# To add a new event, just append its name to this list.
+foreach _event {shart hangover puke} {
+    # Initialise state for this event
+    set et_timestamp($_event)    0
+    set et_nick($_event)         ""
+    set et_pending_nick($_event) ""
+    set et_pending_time($_event) 0
+
+    # Load persisted data
+    et_load_data    $_event
+    et_load_metrics $_event
+
+    # Create thin wrapper procs so eggdrop bind can find them by name,
+    # with the event name baked in at definition time.
+    proc ${_event}reset      {nick uhost hand chan text} "et_reset      [list $_event] \$nick \$uhost \$hand \$chan \$text"
+    proc ${_event}confirm    {nick uhost hand chan text} "et_confirm    [list $_event] \$nick \$uhost \$hand \$chan \$text"
+    proc ${_event}           {nick uhost hand chan text} "et_show       [list $_event] \$nick \$uhost \$hand \$chan \$text"
+    proc ${_event}status     {nick uhost hand chan text} "et_status     [list $_event] \$nick \$uhost \$hand \$chan \$text"
+    proc ${_event}league     {nick uhost hand chan text} "et_league     [list $_event] \$nick \$uhost \$hand \$chan \$text"
+    proc ${_event}yearreview {nick uhost hand chan text} "et_yearreview [list $_event] \$nick \$uhost \$hand \$chan \$text"
+    proc ${_event}history    {nick uhost hand chan text} "et_history    [list $_event] \$nick \$uhost \$hand \$chan \$text"
+    proc ${_event}help       {nick uhost hand chan text} "et_help       [list $_event] \$nick \$uhost \$hand \$chan \$text"
+
+    bind pub - !${_event}reset      ${_event}reset
+    bind pub - !${_event}confirm    ${_event}confirm
+    bind pub - !${_event}           ${_event}
+    bind pub - !${_event}status     ${_event}status
+    bind pub - !${_event}league     ${_event}league
+    bind pub - !${_event}yearreview ${_event}yearreview
+    bind pub - !${_event}history    ${_event}history
+    bind pub - !${_event}help       ${_event}help
+}
+unset _event
+
+# !shame — show both shartleague and hangoverleague
+proc shame {nick uhost hand chan text} {
+    if [string equal "#amateurradio" $chan] then { return }
+    et_league shart   $nick $uhost $hand $chan $text
+    et_league hangover $nick $uhost $hand $chan $text
+}
+bind pub - !shame shame
+
+
+# NHL scores: !nhl <team> plus common aliases
+set nhlbin "/home/eggdrop/bin/nhl"
+bind pub - !nhl nhl_pub
+bind msg - !nhl nhl_msg
+proc nhl_pub { nick host hand chan text } {
+	global nhlbin
+	set param [sanitize_string [string trim "${text}"]]
+	putlog "nhl pub: $nick $host $hand $chan $param"
+	set fd [open "|${nhlbin} ${param}" r]
+	fconfigure $fd -encoding utf-8
+	while {[gets $fd line] >= 0} { putchan $chan "$line" }
+	close $fd
+}
+proc nhl_msg { nick uhand handle input } {
+	global nhlbin
+	set param [sanitize_string [string trim "${input}"]]
+	putlog "nhl msg: $nick $uhand $handle $param"
+	set fd [open "|${nhlbin} ${param}" r]
+	fconfigure $fd -encoding utf-8
+	while {[gets $fd line] >= 0} { putmsg "$nick" "$line" }
+	close $fd
+}
+
+foreach _team {flyers leafs bruins rangers penguins capitals blackhawks kings ducks
+               avalanche lightning panthers canadiens senators sabres wings
+               preds blues stars wild jets oilers canucks flames sharks kraken
+               knights canes jackets isles devils} {
+	bind pub - "!${_team}" nhl_team_pub
+	bind msg - "!${_team}" nhl_team_msg
+}
+unset _team
+proc nhl_team_pub { nick host hand chan text } {
+	global nhlbin lastbind
+	set team [string range $lastbind 1 end]
+	putlog "nhl team pub: $nick $host $hand $chan $team"
+	set fd [open "|${nhlbin} ${team}" r]
+	fconfigure $fd -encoding utf-8
+	while {[gets $fd line] >= 0} { putchan $chan "$line" }
+	close $fd
+}
+proc nhl_team_msg { nick uhand handle input } {
+	global nhlbin lastbind
+	set team [string range $lastbind 1 end]
+	putlog "nhl team msg: $nick $uhand $handle $team"
+	set fd [open "|${nhlbin} ${team}" r]
+	fconfigure $fd -encoding utf-8
+	while {[gets $fd line] >= 0} { putmsg "$nick" "$line" }
+	close $fd
+}
 
 #This is probably stupid - WHOIS ME, WHOAM I
 

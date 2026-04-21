@@ -29,6 +29,12 @@ STDERR->autoflush();
 
 my $username = $ENV{'USER'} || $ENV{'USERNAME'} || getpwuid($<);
 
+our $scrapingant_key=undef;
+my $scrapingantfile = $ENV{'HOME'} . "/.qrmbot/keys/scrapingantkey";
+if (-e ($scrapingantfile)) {
+  require($scrapingantfile);
+}
+
 # change this to 0 to always exit with success
 our $exitnonzeroonerror = 1;
 $exitnonzeroonerror = 0 if $username eq getEggdropUID();
@@ -41,9 +47,13 @@ my $apitype = "lol";
 #my $apitype = "reapi";
 
 our $apikey_adsb_fi;
-my $apikeyfile = $ENV{'HOME'} . "/.adsb-api-keys";
+my $old_apikeyfile = $ENV{'HOME'} . "/.adsb-api-keys";
+my $apikeyfile     = $ENV{'HOME'} . "/.qrmbot/keys/adsb.fi";
+moveFile($old_apikeyfile, $apikeyfile);
 if ( -e ($apikeyfile)) {
   require ($apikeyfile);
+} elsif ( -e ($old_apikeyfile)) {
+  require ($old_apikeyfile);
 } else {
   print "warning: unable to read file $apikeyfile\n"
 }
@@ -147,6 +157,7 @@ if ($apitype eq "reapi") {
     print "error1 while retrieving data: from $url : $json\n" if not defined $err;
     exit $exitnonzeroonerror;
   }
+  #print $json, "\n";
   my $j = decode_json($json);
 
   $total = $j->{resultCount};
@@ -166,7 +177,7 @@ if ($apitype eq "reapi") {
   }
   exit $exitnonzeroonerror if $total == 0;
 
-  show($j->{aircraft}->[0], $j->{now}, $lat, $lon);
+  show($j->{aircraft}->[0], $j->{now} / 1000, $lat, $lon);
 
 } elsif ($apitype eq "lol") {
 
@@ -204,6 +215,7 @@ if ($apitype eq "reapi") {
     print "error1 while retrieving data: from $url : $json\n";
     exit $exitnonzeroonerror;
   }
+  #print $json, "\n";
   my $j = decode_json($json);
 
   my $total = $j->{total};
@@ -223,13 +235,15 @@ if ($apitype eq "reapi") {
   }
   exit $exitnonzeroonerror if $total == 0;
 
-  show($j->{ac}->[0], $j->{now}, $lat, $lon);
+  show($j->{ac}->[0], $j->{now} / 1000, $lat, $lon);
 }
 
 sub updateICAOtypes {
   #my $url = "https://www4.icao.int/doc8643/External/AircraftTypes";
   my $url = "https://web.archive.org/web/20230101013553/https://www4.icao.int/doc8643/External/AircraftTypes";
-  my $typesfile = $ENV{'HOME'} . "/.icao-types";
+  my $old_typesfile = $ENV{'HOME'} . "/.icao-types";
+  my $typesfile     = $ENV{'HOME'} . "/.qrmbot/cache/icao-types";
+  moveFile($old_typesfile, $typesfile);
   my $needICAO = 0;
   my $now = time;
   my $maxage=604800; # 1 week
@@ -505,7 +519,12 @@ sub getAirFrame
 sub getFlightTrack
 {
   my $flight = shift;
+  our $scrapingant_key;
   my $url = "https://flightaware.com/live/flight/$flight";
+
+  if (defined $scrapingant_key) {
+    $url = "https://api.scrapingant.com/v2/general?url=". uri_escape($url) . "&x-api-key=${scrapingant_key}&browser=false";
+  }
   my ($airline, $orig, $dest, $fnum, $eta);
   my $token;
   #print "$url\n";

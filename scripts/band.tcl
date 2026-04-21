@@ -46,7 +46,6 @@ proc b_pubquote { nick uhost hand chan arg } {
   if { [file exists $bandfile] } {
 
     set qf [open $bandfile r]
-    set done 0
 
     set fd [open "|wc -l $bandfile" r]
     while {![eof $fd]} {
@@ -55,7 +54,10 @@ proc b_pubquote { nick uhost hand chan arg } {
     }
     close $fd
 
-    set i 0
+    if { $tmp == 0 } {
+      putchan $chan "no bands recorded"
+      return
+    }
 
     if { [string trim "$arg"] == "" } {
       set j [rand $tmp]
@@ -72,13 +74,11 @@ proc b_pubquote { nick uhost hand chan arg } {
       }
     }
 
+    set i 0
     while { $j >= $i } {
-
       set line [gets $qf]
       incr i
-
     }
-
     close $qf
 
     putchan $chan "[lindex $line 0]"
