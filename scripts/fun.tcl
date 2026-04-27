@@ -1591,8 +1591,8 @@ array set trivia_correct       {}
 array set trivia_round_correct {}
 array set trivia_tiebreak      {}
 array set trivia_tienicks      {}
-array set trivia_tb_noanswer   {}
-array set trivia_last_game     {}
+array set trivia_tb_noanswer      {}
+array set trivia_shared_last_game {}
 
 proc trivia_is_exempt {nick} {
     set exempt {molo Crossbar}
@@ -1626,7 +1626,7 @@ proc trivia_clear {chan} {
 }
 
 proc trivia_pub {nick host hand chan text} {
-    global trivia_active trivia_starting trivia_last_game
+    global trivia_active trivia_starting trivia_shared_last_game
     global trivia_cooldown_secs trivia_rounds trivia_round_secs trivia_start_delay
 
     if {[info exists trivia_active($chan)] && $trivia_active($chan)} {
@@ -1639,8 +1639,8 @@ proc trivia_pub {nick host hand chan text} {
     }
 
     if {![trivia_is_exempt $nick]} {
-        if {[info exists trivia_last_game($chan)]} {
-            set elapsed [expr {[clock seconds] - $trivia_last_game($chan)}]
+        if {[info exists trivia_shared_last_game($chan)]} {
+            set elapsed [expr {[clock seconds] - $trivia_shared_last_game($chan)}]
             if {$elapsed < $trivia_cooldown_secs} {
                 set remaining [expr {$trivia_cooldown_secs - $elapsed}]
                 set nexttime [clock format [expr {[clock seconds] + $remaining}] -format "%H:%M UTC" -gmt 1]
@@ -1658,7 +1658,7 @@ proc trivia_pub {nick host hand chan text} {
 
 proc trivia_start {chan} {
     global triviabin trivia_starting trivia_active trivia_questions
-    global trivia_qindex trivia_round trivia_last_game
+    global trivia_qindex trivia_round trivia_shared_last_game
 
     # Bail if game was cancelled during countdown
     if {![info exists trivia_starting($chan)] || !$trivia_starting($chan)} { return }
@@ -1687,7 +1687,7 @@ proc trivia_start {chan} {
     set trivia_questions($chan) $lines
     set trivia_qindex($chan)    0
     set trivia_round($chan)     1
-    set trivia_last_game($chan) [clock seconds]
+    set trivia_shared_last_game($chan) [clock seconds]
 
     trivia_ask $chan
 }
@@ -1943,8 +1943,6 @@ set hamtriviabin            "/home/eggdrop/bin/hamtrivia"
 set hamtrivia_rounds        3
 set hamtrivia_round_secs    20
 set hamtrivia_start_delay   30
-set hamtrivia_cooldown_secs 1800
-
 array set hamtrivia_active        {}
 array set hamtrivia_starting      {}
 array set hamtrivia_questions     {}
@@ -1957,7 +1955,6 @@ array set hamtrivia_round_correct {}
 array set hamtrivia_tiebreak      {}
 array set hamtrivia_tienicks      {}
 array set hamtrivia_tb_noanswer   {}
-array set hamtrivia_last_game     {}
 
 proc hamtrivia_clear {chan} {
     global hamtrivia_active hamtrivia_starting hamtrivia_questions hamtrivia_qindex
@@ -1978,8 +1975,8 @@ proc hamtrivia_clear {chan} {
 }
 
 proc hamtrivia_pub {nick host hand chan text} {
-    global hamtrivia_active hamtrivia_starting hamtrivia_last_game
-    global hamtrivia_cooldown_secs hamtrivia_rounds hamtrivia_round_secs hamtrivia_start_delay
+    global hamtrivia_active hamtrivia_starting trivia_shared_last_game
+    global trivia_cooldown_secs hamtrivia_rounds hamtrivia_round_secs hamtrivia_start_delay
     global trivia_active trivia_starting
 
     if {[info exists trivia_active($chan)] && $trivia_active($chan)} {
@@ -2000,12 +1997,12 @@ proc hamtrivia_pub {nick host hand chan text} {
     }
 
     if {![trivia_is_exempt $nick]} {
-        if {[info exists hamtrivia_last_game($chan)]} {
-            set elapsed [expr {[clock seconds] - $hamtrivia_last_game($chan)}]
-            if {$elapsed < $hamtrivia_cooldown_secs} {
-                set remaining [expr {$hamtrivia_cooldown_secs - $elapsed}]
+        if {[info exists trivia_shared_last_game($chan)]} {
+            set elapsed [expr {[clock seconds] - $trivia_shared_last_game($chan)}]
+            if {$elapsed < $trivia_cooldown_secs} {
+                set remaining [expr {$trivia_cooldown_secs - $elapsed}]
                 set nexttime [clock format [expr {[clock seconds] + $remaining}] -format "%H:%M UTC" -gmt 1]
-                putchan $chan "⏳ $nick: Ham Radio Trivia is on cooldown. Next game allowed at $nexttime."
+                putchan $chan "⏳ $nick: Trivia is on cooldown. Next game allowed at $nexttime."
                 return
             }
         }
@@ -2019,7 +2016,7 @@ proc hamtrivia_pub {nick host hand chan text} {
 
 proc hamtrivia_start {chan} {
     global hamtriviabin hamtrivia_starting hamtrivia_active hamtrivia_questions
-    global hamtrivia_qindex hamtrivia_round hamtrivia_last_game
+    global hamtrivia_qindex hamtrivia_round trivia_shared_last_game
 
     if {![info exists hamtrivia_starting($chan)] || !$hamtrivia_starting($chan)} { return }
     set hamtrivia_starting($chan) 0
@@ -2047,7 +2044,7 @@ proc hamtrivia_start {chan} {
     set hamtrivia_questions($chan) $lines
     set hamtrivia_qindex($chan)    0
     set hamtrivia_round($chan)     1
-    set hamtrivia_last_game($chan) [clock seconds]
+    set trivia_shared_last_game($chan) [clock seconds]
 
     hamtrivia_ask $chan
 }
